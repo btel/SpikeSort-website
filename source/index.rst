@@ -45,10 +45,21 @@ sorting.
 Start sorting in matter of minutes
 ----------------------------------
 
-.. code-block:: python
+Run included Python script:
 
-   import spike_sort
+.. code-block:: bash
 
+   $ export DATAPATH='where/your/data/is/located'
+   $ python -i cluster_beans.py
+
+and start analysing:
+
+.. code-block:: pycon
+
+   >>> browser.show() # 
+   >>> cluster = base.features['LabelSource'] 
+   >>> cluster.recluster(1, 'gmm',2)
+   >>> cluster.delete_cells(2, 3)
 
 Features
 --------
@@ -68,7 +79,10 @@ Features
 
 * memory and speed-optimised
 
-* custom workflows may be implemented in Python
+* custom workflows are easily implemented in Python
+
+* use of well-established Python libraries: NumPy, PyTables,
+  matplotlib, Scikits.learn 
 
 License
 -------
