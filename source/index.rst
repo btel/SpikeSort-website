@@ -52,13 +52,16 @@ Run included Python script:
    $ export DATAPATH='where/your/data/is/located'
    $ python -i cluster_beans.py
 
-and start analysing:
+and you can start sorting:
 
 .. code-block:: pycon
-
-   >>> browser.show() # 
+   
+   # sort automatically and show results
+   >>> browser.show()
+   # automatically split cell 1 into 2 cells
    >>> cluster = base.features['LabelSource'] 
    >>> cluster.recluster(1, 'gmm',2)
+   # delete unwanted cells and stimulus artifacts
    >>> cluster.delete_cells(2, 3)
 
 Features
