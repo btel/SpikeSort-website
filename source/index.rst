@@ -56,36 +56,30 @@ and you can start sorting:
 
 .. code-block:: pycon
    
-   # sort automatically and show results
-   >>> browser.show()
-   # automatically split cell 1 into 2 cells
+   >>> browser.show()                         # sort and show results
    >>> cluster = base.features['LabelSource'] 
-   >>> cluster.recluster(1, 'gmm',2)
-   # delete unwanted cells and stimulus artifacts
-   >>> cluster.delete_cells(2, 3)
+   >>> cluster.recluster(1, 'gmm',2 )         # split cell 1 into 2 clusters
+   >>> cluster.delete_cells(2, 3)             # delete unwanted cells
 
 Features
 --------
 
-* user-friendly and customisable
+* user-friendly and customisable,
 
-* interactive, command-line interface
+* interactive command-line interface in Python,
 
-* graphical-user interface and visualization widgets
+* graphical-user interface and visualization widgets,
 
 * k-means and gaussian mixture models clustering algorithms and manual
-  cluster cutting
+  cluster cutting,
 
-* support for multi-channel data (for example, from tetrodes)
+* support for multi-channel data (for example, from tetrodes),
 
-* support for binary data-sets and HDF5 files
+* support for binary datasets and HDF5 files (support for other formats can be
+  easily implemented),
 
-* memory and speed-optimised
-
-* custom workflows are easily implemented in Python
-
-* use of well-established Python libraries: NumPy, PyTables,
-  matplotlib, Scikits.learn 
+* based on established scientific libraries: `NumPy`_, `PyTables`_,
+  `matplotlib`_, `scikit-learn`_
 
 License
 -------
@@ -106,3 +100,11 @@ fork. If you just want to chat with developers, send us an e-mail.
 .. _license: https://github.com/btel/SpikeSort/blob/master/LICENSE
 
 .. _Scholarpedia: http://www.scholarpedia.org/article/Spike_sorting
+
+.. _NumPy: http://numpy.scipy.org/
+
+.. _PyTables: http://www.pytables.org/moin
+
+.. _matplotlib: http://matplotlib.sourceforge.net/
+
+.. _scikit-learn: http://scikit-learn.org/stable/

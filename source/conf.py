@@ -28,7 +28,7 @@ import sys, os
 extensions = ['sphinx.ext.intersphinx']
 
 intersphinx_mapping = {'docs':
-                       ('http://btel.github.com/SpikeSort/docs/',
+                       ('http://www.spikesort.org/docs/',
                         'docs_objects.inv')}
 
 # Add any paths that contain templates here, relative to this directory.
