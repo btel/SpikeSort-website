@@ -15,7 +15,7 @@ project B4.
 Dmytro Bielievtsov
 ------------------
 
-Dmytro obtained his Bachelor degree in mathematics and currently he is
+Dmytro obtained his Bachelor degree in computer engineering and currently he is
 working towards MSc in Computational Neuroscience at Bernstein Center
 for Computational Neuroscience in Berlin. 
 
