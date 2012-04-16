@@ -1,0 +1,44 @@
+{% extends "basic/layout.html" %}
+
+{% set navigation_bar = [
+    ('index', 'Home'),
+    ('news', 'News'),
+    ('screenshots', 'Screenshots'),
+    ('downloads', 'Downloads'),
+    ('credits', 'Credits')
+] -%}
+
+
+{% block header %}
+  {{ super() }}
+  <div class=indexwrapper> <h1>SpikeSort Homepage</h1></div>
+  
+  <div class="related">
+  {% for id, caption in navigation_bar %}
+      {% if id == pagename %}
+      {{ caption|e }} //
+      {% else %}
+          <a href="{{ pathto(id) }}">{{ caption|e }}</a> //
+      {% endif %}
+  {% endfor %}
+  <a href="http://www.spikesort.org/docs/">Documentation</a>
+  </div>
+{% endblock %}
+
+{% block footer %}
+<div class=footer>
+    <b>Contact</b>: <a
+        href="mailto:b.telenczuk@biologie.hu-berlin.de">Bartosz
+        Telenczuk</a>, Dmytro Bielievtsov 
+</div>
+{% endblock %}
+{# do not display relbars #}
+{% block relbar1 %} {% endblock %} 
+{% block relbar2 %}
+  {% if theme_github_fork %}
+    <a href="http://github.com/{{ theme_github_fork }}"><img style="position: fixed; top: 0; right: 0; border: 0;"
+    src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+  {% endif %}
+{% endblock %}
+{% block sidebar1 %}{% endblock %}
+{% block sidebar2 %}{% endblock %}
