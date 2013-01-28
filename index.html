@@ -1,0 +1,156 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome &mdash; SpikeSort Homepage 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="SpikeSort Homepage 0.1 documentation" href="#" /> 
+  </head>
+  <body>
+  
+  <div class=indexwrapper> <h1>SpikeSort Homepage</h1></div>
+  
+  <div class="related">
+  
+      
+      Home //
+      
+  
+      
+          <a href="news.html">News</a> //
+      
+  
+      
+          <a href="screenshots.html">Screenshots</a> //
+      
+  
+      
+          <a href="downloads.html">Downloads</a> //
+      
+  
+      
+          <a href="credits.html">Credits</a> //
+      
+  
+  <a href="http://www.spikesort.org/docs/">Documentation</a>
+  </div>
+ 
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="welcome">
+<h1>Welcome<a class="headerlink" href="#welcome" title="Permalink to this headline">¶</a></h1>
+<p><em>SpikeSort is a flexible spike sorting framework implemented completely
+in Python. It features manual and automatic clustering, many data
+formats and it is memory-efficient. Truely Open Source, BSD-licensed.</em></p>
+<div class="section" id="eavesdropping-on-neurons-in-action">
+<h2>Eavesdropping on neurons in action<a class="headerlink" href="#eavesdropping-on-neurons-in-action" title="Permalink to this headline">¶</a></h2>
+<p>Spike sorting is a common pre-processing step for the analysis of
+neuroscientific data.  The goal of the procedure is to detect the times
+at which neurons generated action potential, also called spikes.</p>
+<p>The times at which spikes arrive encode information about sensory stimuli and
+their perception. Therefore, correct identification of occurrences of
+spikes elicited by different neurons is necessary to understand
+the function and disfunction of nervous system.</p>
+</div>
+<div class="section" id="spike-sorting-done-right">
+<h2>Spike sorting done right<a class="headerlink" href="#spike-sorting-done-right" title="Permalink to this headline">¶</a></h2>
+<p>Spike sorting is based on
+extracellular recordings of small electric potential associated with
+spikes by microelectrodes placed very close to the cell. In practice, such
+electrodes pick up activity of multiple neurons active simultaneously.
+The goal of spike sorting is  to discriminate the responses of
+indvidual cells from others.</p>
+<p>Each cell has its own characteristic spike waveshape, so that cells
+can be easily differentiated just by comparing their spikes.  Spikes
+of similar shapes and amplitudes are grouped together using automatic or manual
+clustering procedure.</p>
+<p>If you want to know more read an in-depth article on spike sorting in
+<a class="reference external" href="http://www.scholarpedia.org/article/Spike_sorting">Scholarpedia</a> or simply go directly to the <a class="reference external" href="http://www.spikesort.org/docs/tutorials/index.html#tutorials-section" title="(in SpikeSort v0.1)"><em class="xref std std-ref">tutorials</em></a> in the documentation of SpikeSort and start
+sorting.</p>
+</div>
+<div class="section" id="start-sorting-in-matter-of-minutes">
+<h2>Start sorting in matter of minutes<a class="headerlink" href="#start-sorting-in-matter-of-minutes" title="Permalink to this headline">¶</a></h2>
+<p>Run included Python script:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nv">$ </span><span class="nb">export </span><span class="nv">DATAPATH</span><span class="o">=</span><span class="s1">&#39;where/your/data/is/located&#39;</span>
+<span class="nv">$ </span>python -i cluster_beans.py
+</pre></div>
+</div>
+<p>and you can start sorting:</p>
+<div class="highlight-pycon"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">browser</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>                         <span class="c"># sort and show results</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cluster</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="s">&#39;LabelSource&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cluster</span><span class="o">.</span><span class="n">recluster</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;gmm&#39;</span><span class="p">,</span><span class="mi">2</span> <span class="p">)</span>         <span class="c"># split cell 1 into 2 clusters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cluster</span><span class="o">.</span><span class="n">delete_cells</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>             <span class="c"># delete unwanted cells</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>user-friendly and customisable,</li>
+<li>interactive command-line interface in Python,</li>
+<li>graphical-user interface and visualization widgets,</li>
+<li>k-means and gaussian mixture models clustering algorithms and manual
+cluster cutting,</li>
+<li>support for multi-channel data (for example, from tetrodes),</li>
+<li>support for binary datasets and HDF5 files (support for other formats can be
+easily implemented),</li>
+<li>based on established scientific libraries: <a class="reference external" href="http://numpy.scipy.org/">NumPy</a>, <a class="reference external" href="http://www.pytables.org/moin">PyTables</a>,
+<a class="reference external" href="http://matplotlib.sourceforge.net/">matplotlib</a>, <a class="reference external" href="http://scikit-learn.org/stable/">scikit-learn</a></li>
+</ul>
+</div>
+<div class="section" id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<p>SpikeSort is free and <a class="reference external" href="http://www.opensource.org/docs/osd">Open Source</a>. Its liberal <a class="reference external" href="https://github.com/btel/SpikeSort/blob/master/LICENSE">license</a> (BSD) allows for
+non-commercial and commercial use.</p>
+</div>
+<div class="section" id="contribute">
+<h2>Contribute<a class="headerlink" href="#contribute" title="Permalink to this headline">¶</a></h2>
+<p>Found a bug? Have a good idea for improving SpikeSort?  Need help to
+analyse your data? Head over to github page and create a new ticket or
+fork. If you just want to chat with developers, send us an e-mail.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/btel/spikesort"><img style="position: fixed; top: 0; right: 0; border: 0;"
+    src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+  
+
+<div class=footer>
+    <b>Contact</b>: <a
+        href="mailto:b.telenczuk@biologie.hu-berlin.de">Bartosz
+        Telenczuk</a>, Dmytro Bielievtsov 
+</div>
+
+  </body>
+</html>
