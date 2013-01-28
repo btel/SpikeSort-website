@@ -1,0 +1,317 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>spike_sort.core.cluster &mdash; SpikeSort 0.13dev documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.13dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="SpikeSort 0.13dev documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+  
+  
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../../np-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">SpikeSort 0.13dev documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for spike_sort.core.cluster</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c">#coding=utf-8</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">spike_sort.ui</span> <span class="kn">import</span> <span class="n">manual_sort</span>
+
+<span class="c">#optional scikits.learn imports</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="c">#import scikits.learn &gt;= 0.9</span>
+    <span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">cluster</span> <span class="k">as</span> <span class="n">skcluster</span>
+    <span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">mixture</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c">#import scikits.learn &lt; 0.9</span>
+        <span class="kn">from</span> <span class="nn">scikits.learn</span> <span class="kn">import</span> <span class="n">cluster</span> <span class="k">as</span> <span class="n">skcluster</span>
+        <span class="kn">from</span> <span class="nn">scikits.learn</span> <span class="kn">import</span> <span class="n">mixture</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="k_means_plus"><a class="viewcode-back" href="../../../modules/cluster.html#spike_sort.core.cluster.k_means_plus">[docs]</a><span class="k">def</span> <span class="nf">k_means_plus</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;k means with smart initialization.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function requires scikits-learn</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    kmeans</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+        
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">clusters</span> <span class="o">=</span> <span class="n">skcluster</span><span class="o">.</span><span class="n">k_means</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="s">&quot;scikits.learn must be installed to use k_mean_plus&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">clusters</span>
+    
+    
+</div>
+<div class="viewcode-block" id="gmm"><a class="viewcode-back" href="../../../modules/cluster.html#spike_sort.core.cluster.gmm">[docs]</a><span class="k">def</span> <span class="nf">gmm</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Cluster based on gaussian mixture models</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : dict</span>
+<span class="sd">        features structure</span>
+<span class="sd">    k :  int</span>
+<span class="sd">        number of clusters</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    cl : int array</span>
+<span class="sd">        cluster indicies</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function requires scikits-learn</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c">#scikits.learn 0.8</span>
+        <span class="n">clf</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">GMM</span><span class="p">(</span><span class="n">n_states</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">cvtype</span><span class="o">=</span><span class="s">&#39;full&#39;</span><span class="p">)</span> 
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">clf</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">GMM</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">cvtype</span><span class="o">=</span><span class="s">&#39;full&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="c">#scikits.learn 0.11</span>
+            <span class="n">clf</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">GMM</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">covariance_type</span><span class="o">=</span><span class="s">&#39;full&#39;</span><span class="p">)</span> 
+    <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s">&quot;scikits.learn must be installed to use gmm&quot;</span><span class="p">)</span>
+        
+    <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">cl</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cl</span>
+
+
+</div>
+<div class="viewcode-block" id="manual"><a class="viewcode-back" href="../../../modules/cluster.html#spike_sort.core.cluster.manual">[docs]</a><span class="k">def</span> <span class="nf">manual</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sort spikes manually by cluster cutting</span>
+
+<span class="sd">    Opens a new window in which you can draw cluster of arbitrary</span>
+<span class="sd">    shape.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Only two first features are plotted</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">manual_sort</span><span class="o">.</span><span class="n">_cluster</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="none"><a class="viewcode-back" href="../../../modules/cluster.html#spike_sort.core.cluster.none">[docs]</a><span class="k">def</span> <span class="nf">none</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Do nothing&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;int16&#39;</span><span class="p">)</span>
+
+</div>
+<span class="k">def</span> <span class="nf">_metric_euclidean</span><span class="p">(</span><span class="n">data1</span><span class="p">,</span> <span class="n">data2</span><span class="p">):</span>
+    <span class="n">n_pts1</span><span class="p">,</span> <span class="n">n_dims1</span> <span class="o">=</span> <span class="n">data1</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">n_pts2</span><span class="p">,</span> <span class="n">n_dims2</span> <span class="o">=</span> <span class="n">data2</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">n_dims1</span> <span class="o">==</span> <span class="n">n_dims2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;data1 and data2 must have the same number of columns&quot;</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_pts1</span><span class="p">,</span> <span class="n">n_pts2</span><span class="p">),</span> <span class="s">&#39;d&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">n_dims1</span><span class="p">):</span>
+        <span class="n">_data1</span> <span class="o">=</span> <span class="n">data1</span><span class="p">[:,</span> <span class="n">d</span><span class="p">]</span>
+        <span class="n">_data2</span> <span class="o">=</span> <span class="n">data2</span><span class="p">[:,</span> <span class="n">d</span><span class="p">]</span>
+        <span class="n">_delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">_data1</span><span class="p">,</span> <span class="n">_data2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">delta</span> <span class="o">+=</span> <span class="n">_delta</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="dist_euclidean"><a class="viewcode-back" href="../../../modules/cluster.html#spike_sort.core.cluster.dist_euclidean">[docs]</a><span class="k">def</span> <span class="nf">dist_euclidean</span><span class="p">(</span><span class="n">spike_waves1</span><span class="p">,</span> <span class="n">spike_waves2</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Given spike_waves calculate pairwise Euclidean distance between</span>
+<span class="sd">    them&quot;&quot;&quot;</span>
+
+    <span class="n">sp_data1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">spike_waves1</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">spike_waves2</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">sp_data2</span> <span class="o">=</span> <span class="n">sp_data1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sp_data2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">spike_waves2</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">_metric_euclidean</span><span class="p">(</span><span class="n">sp_data1</span><span class="p">,</span> <span class="n">sp_data2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">d</span>
+
+</div>
+<div class="viewcode-block" id="cluster"><a class="viewcode-back" href="../../../modules/cluster.html#spike_sort.core.cluster.cluster">[docs]</a><span class="k">def</span> <span class="nf">cluster</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Automatically cluster spikes using K means algorithm</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    features : dict</span>
+<span class="sd">        spike features datastructure</span>
+<span class="sd">    n_clusters : int</span>
+<span class="sd">        number of clusters to identify</span>
+<span class="sd">    args, kwargs :</span>
+<span class="sd">        optional arguments that are passed to the clustering algorithm</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    labels : array</span>
+<span class="sd">        array of cluster (unit) label - one for each cell</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Create a sample feature dataset and use k-means clustering to find</span>
+<span class="sd">    groups of spikes (units)</span>
+
+<span class="sd">    &gt;&gt;&gt; import spike_sort</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; np.random.seed(1234) #k_means uses random initialization</span>
+<span class="sd">    &gt;&gt;&gt; features = {&#39;data&#39;:np.array([[0.,0.],</span>
+<span class="sd">    ...                              [0, 1.],</span>
+<span class="sd">    ...                              [0, 0.9],</span>
+<span class="sd">    ...                              [0.1,0]])}</span>
+<span class="sd">    &gt;&gt;&gt; labels = spike_sort.cluster.cluster(&#39;k_means&#39;, features, 2)</span>
+<span class="sd">    &gt;&gt;&gt; print labels</span>
+<span class="sd">    [0 1 1 0]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cluster_func</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="s">&quot;clustering method </span><span class="si">%s</span><span class="s"> is not implemented&quot;</span> <span class="o">%</span> <span class="n">method</span>
+                    <span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">features</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;is_valid&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">valid_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">cl</span> <span class="o">=</span> <span class="n">cluster_func</span><span class="p">(</span><span class="n">valid_data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;int&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">labels</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">cl</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">cluster_func</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">labels</span>
+
+</div>
+<div class="viewcode-block" id="k_means"><a class="viewcode-back" href="../../../modules/cluster.html#spike_sort.core.cluster.k_means">[docs]</a><span class="k">def</span> <span class="nf">k_means</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">K</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Perform K means clustering</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : dict</span>
+<span class="sd">        data vectors (n,m) where n is the number of datapoints and m is</span>
+<span class="sd">        the number of variables</span>
+<span class="sd">    K : int</span>
+<span class="sd">        number of distinct clusters to identify</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    partition : array</span>
+<span class="sd">        vector of cluster labels (ints) for each datapoint from `data`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n_dim</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">centers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">n_dim</span><span class="p">)</span>
+    <span class="n">centers_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">n_dim</span><span class="p">)</span>
+    <span class="n">partition</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="p">(</span><span class="n">centers_new</span> <span class="o">==</span> <span class="n">centers</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="n">centers</span> <span class="o">=</span> <span class="n">centers_new</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">distances</span> <span class="o">=</span> <span class="p">(</span><span class="n">centers</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">features</span><span class="p">)</span>
+        <span class="n">distances</span> <span class="o">*=</span> <span class="n">distances</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">distances</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">partition</span> <span class="o">=</span> <span class="n">distances</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">partition</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">centers_new</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">features</span><span class="p">[</span><span class="n">partition</span> <span class="o">==</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">partition</span>
+
+</div>
+<div class="viewcode-block" id="split_cells"><a class="viewcode-back" href="../../../modules/cluster.html#spike_sort.core.cluster.split_cells">[docs]</a><span class="k">def</span> <span class="nf">split_cells</span><span class="p">(</span><span class="n">spt_dict</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;return the spike times belonging to the cluster and the rest&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">which</span> <span class="o">==</span> <span class="s">&#39;all&#39;</span><span class="p">:</span>
+        <span class="n">classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">classes</span> <span class="o">=</span> <span class="n">which</span>
+    <span class="n">spt</span> <span class="o">=</span> <span class="n">spt_dict</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">spt_dicts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">cl</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="n">spt</span><span class="p">[</span><span class="n">idx</span> <span class="o">==</span> <span class="n">cl</span><span class="p">]})</span> <span class="k">for</span> <span class="n">cl</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">spt_dicts</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"> <img src="../../../_static/logo.png"
+type="image/png" /> </img> <h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div> 
+  <div class="footer">
+    &copy; Copyright 2011, Bartosz Telenczuk, Dmytro Bielievstsov.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

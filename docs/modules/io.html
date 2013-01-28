@@ -1,0 +1,462 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>File I/O (spike_sort.io) &mdash; SpikeSort 0.13dev documentation</title>
+    
+    <link rel="stylesheet" href="../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.13dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="SpikeSort 0.13dev documentation" href="../index.html" />
+    <link rel="prev" title="Evaluate (spike_sort.evaluate)" href="evaluate.html" /> 
+  </head>
+  <body>
+  
+  
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../np-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="evaluate.html" title="Evaluate (spike_sort.evaluate)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">SpikeSort 0.13dev documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="file-i-o-spike-sort-io">
+<h1>File I/O (<tt class="xref py py-mod docutils literal"><span class="pre">spike_sort.io</span></tt>)<a class="headerlink" href="#file-i-o-spike-sort-io" title="Permalink to this headline">¶</a></h1>
+<p>Functions for reading and writing datafiles.</p>
+<div class="section" id="read-write-filters-spike-sort-io-filters">
+<span id="io-filters"></span><h2>Read/Write Filters (<a class="reference internal" href="#module-spike_sort.io.filters" title="spike_sort.io.filters"><tt class="xref py py-mod docutils literal"><span class="pre">spike_sort.io.filters</span></tt></a>)<a class="headerlink" href="#read-write-filters-spike-sort-io-filters" title="Permalink to this headline">¶</a></h2>
+<p>Filters are basic backends for read/write operations. They offer following
+methods:</p>
+<blockquote>
+<div><ul class="simple">
+<li><tt class="xref py py-func docutils literal"><span class="pre">read_spt()</span></tt> &#8211; read event times (such as spike times)</li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">read_sp()</span></tt> &#8211; read raw spike waveforms</li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">write_spt()</span></tt> &#8211; write spike times</li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">write_sp()</span></tt> &#8211; write raw spike waveforms</li>
+</ul>
+</div></blockquote>
+<p>The <cite>read_*</cite> methods take usually one argument (<cite>datapath</cite>), but it is
+not required. The <cite>write_*</cite> methods take <cite>datapath</cite> and the data to be
+written.</p>
+<p>If you want to read/write you custom data format, it is enough that
+you implement a class with these functions.</p>
+<p>The following filters are implemented:</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.io.filters.BakerlabFilter" title="spike_sort.io.filters.BakerlabFilter"><tt class="xref py py-obj docutils literal"><span class="pre">filters.BakerlabFilter</span></tt></a>(conf_file)</td>
+<td>Filter for custom binary data structure.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#spike_sort.io.filters.PyTablesFilter" title="spike_sort.io.filters.PyTablesFilter"><tt class="xref py py-obj docutils literal"><span class="pre">filters.PyTablesFilter</span></tt></a>(fname[,&nbsp;mode])</td>
+<td>Read/Write HDF5</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="export-tools-spike-sort-io-export">
+<h2>Export tools (<a class="reference internal" href="#module-spike_sort.io.export" title="spike_sort.io.export"><tt class="xref py py-mod docutils literal"><span class="pre">spike_sort.io.export</span></tt></a>)<a class="headerlink" href="#export-tools-spike-sort-io-export" title="Permalink to this headline">¶</a></h2>
+<p>These tolls take one of the <cite>io.filters</cite> as an argument and export
+data to the file using <cite>write_spt</cite> or <cite>write_sp</cite> methods.</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.io.export.export_cells" title="spike_sort.io.export.export_cells"><tt class="xref py py-obj docutils literal"><span class="pre">export.export_cells</span></tt></a>(io_filter,&nbsp;node_templ,&nbsp;...)</td>
+<td>Export discriminated spike times of all cells to a file.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-spike_sort.io.filters">
+<span id="reference"></span><h2>Reference<a class="headerlink" href="#module-spike_sort.io.filters" title="Permalink to this headline">¶</a></h2>
+<p>Filters are basic backends for read/write operations. They offer following
+methods:</p>
+<blockquote>
+<div><ul class="simple">
+<li>read_spt &#8211; read event times (such as spike times)</li>
+<li>write_spt &#8211; write spike times</li>
+<li>read_sp &#8211; read raw spike waveforms</li>
+<li>write_sp &#8211; write raw spike waveforms</li>
+</ul>
+</div></blockquote>
+<dl class="class">
+<dt id="spike_sort.io.filters.BakerlabFilter">
+<em class="property">class </em><tt class="descclassname">spike_sort.io.filters.</tt><tt class="descname">BakerlabFilter</tt><big>(</big><em>conf_file</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/io/filters.html#BakerlabFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.io.filters.BakerlabFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter for custom binary data structure.</p>
+<p>The binary data consists of independent files for each contact in
+each electrode written as 16-bit ints.</p>
+<p>The paths to the datafiles are defined in <tt class="file docutils literal"><span class="pre">.inf</span></tt> file that is
+JSON-compatible and contains at least the following attributes:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>fspike <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>path to raw recordings relative to <cite>dirname</cite></dd>
+<dt>cell <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>path to spike times (with resolution 20 us) relative to
+<cite>dirname</cite></dd>
+<dt>n_contacts <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of contacts per electrode</dd>
+<dt>dirname <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>path to the data</dd>
+<dt>FS <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>spike sampling frequency</dd>
+</dl>
+</div></blockquote>
+<p>Each of the paths can include any of the following Python formatting
+placeholders:</p>
+<blockquote>
+<div><ul class="simple">
+<li><cite>{subject}</cite> &#8211; subeject name</li>
+<li><cite>{cell_id}</cite> &#8211; cell id</li>
+<li><cite>{ses_id}</cite> &#8211; session id</li>
+<li><cite>{el_id}</cite> &#8211; electrode id</li>
+</ul>
+</div></blockquote>
+<p>These will be substituted by data extracted from <cite>datapath</cite>
+paramaeters of the reading and writing methods.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>conf_file</strong> : str</p>
+<blockquote class="last">
+<div><p>path to the configuration file</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">close</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#spike_sort.io.filters.BakerlabFilter.read_sp" title="spike_sort.io.filters.BakerlabFilter.read_sp"><tt class="xref py py-obj docutils literal"><span class="pre">read_sp</span></tt></a>(dataset[,&nbsp;memmap])</td>
+<td>Reads raw spike waveform from file in bakerlab format</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.io.filters.BakerlabFilter.read_spt" title="spike_sort.io.filters.BakerlabFilter.read_spt"><tt class="xref py py-obj docutils literal"><span class="pre">read_spt</span></tt></a>(dataset)</td>
+<td>Returns spike times in miliseconds:</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#spike_sort.io.filters.BakerlabFilter.write_sp" title="spike_sort.io.filters.BakerlabFilter.write_sp"><tt class="xref py py-obj docutils literal"><span class="pre">write_sp</span></tt></a>(sp_dict,&nbsp;dataset)</td>
+<td>Write raw spike waveform to a file in bakerlab format</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.io.filters.BakerlabFilter.write_spt" title="spike_sort.io.filters.BakerlabFilter.write_spt"><tt class="xref py py-obj docutils literal"><span class="pre">write_spt</span></tt></a>(spt_dict,&nbsp;dataset[,&nbsp;overwrite])</td>
+<td>Returns spike times in miliseconds.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="spike_sort.io.filters.BakerlabFilter.read_sp">
+<tt class="descname">read_sp</tt><big>(</big><em>dataset</em>, <em>memmap=None</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/io/filters.html#BakerlabFilter.read_sp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.io.filters.BakerlabFilter.read_sp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads raw spike waveform from file in bakerlab format</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>dataset</strong> : str</p>
+<blockquote>
+<div><p>dataset path (in format
+/{subject}/session{ses_id}/el{el_id})</p>
+</div></blockquote>
+<p><strong>memmap</strong> : {&#8216;numpy&#8217;, &#8216;tables&#8217;, None}, optional</p>
+<blockquote class="last">
+<div><p>if True use memory mapped arrays to save some memory
+(defaults to no memmory-mapping)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="spike_sort.io.filters.BakerlabFilter.read_spt">
+<tt class="descname">read_spt</tt><big>(</big><em>dataset</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/io/filters.html#BakerlabFilter.read_spt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.io.filters.BakerlabFilter.read_spt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns spike times in miliseconds:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>dataset</strong> : str</p>
+<blockquote class="last">
+<div><p>dataset path in format
+/{subject}/session{ses_id}/el{el_id}/cell{cell_id}</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="spike_sort.io.filters.BakerlabFilter.write_sp">
+<tt class="descname">write_sp</tt><big>(</big><em>sp_dict</em>, <em>dataset</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/io/filters.html#BakerlabFilter.write_sp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.io.filters.BakerlabFilter.write_sp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write raw spike waveform to a file in bakerlab format</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>sp_dict</strong> : dict</p>
+<blockquote>
+<div><p>spike waveform dict</p>
+</div></blockquote>
+<p><strong>dataset</strong> : str</p>
+<blockquote class="last">
+<div><p>dataset path</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#spike_sort.io.filters.BakerlabFilter.read_sp" title="spike_sort.io.filters.BakerlabFilter.read_sp"><tt class="xref py py-obj docutils literal"><span class="pre">read_sp</span></tt></a></p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="spike_sort.io.filters.BakerlabFilter.write_spt">
+<tt class="descname">write_spt</tt><big>(</big><em>spt_dict</em>, <em>dataset</em>, <em>overwrite=False</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/io/filters.html#BakerlabFilter.write_spt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.io.filters.BakerlabFilter.write_spt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns spike times in miliseconds.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>dataset</strong> : str</p>
+<blockquote class="last">
+<div><p>dataset path</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#spike_sort.io.filters.BakerlabFilter.read_spt" title="spike_sort.io.filters.BakerlabFilter.read_spt"><tt class="xref py py-obj docutils literal"><span class="pre">read_spt</span></tt></a></p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="spike_sort.io.filters.PyTablesFilter">
+<em class="property">class </em><tt class="descclassname">spike_sort.io.filters.</tt><tt class="descname">PyTablesFilter</tt><big>(</big><em>fname</em>, <em>mode='a'</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/io/filters.html#PyTablesFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.io.filters.PyTablesFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read/Write HDF5</p>
+<p>HDF5 is a hierarchical datafile &#8211; data is organised in a tree. The
+standard layout is:</p>
+<div class="highlight-python"><pre>/{SubjectName}/
+/{SubjectName}/{SessionName}/{ElectrodeID}/
+/{SubjectName}/{SessionName}/{ElectrodeID}/stim: stimulus time
+/{SubjectName}/{SessionName}/{ElectrodeID}/raw: spike waveforms
+/{SubjectName}/{SessionName}/{ElectrodeID}/{CellID}: spike waveforms
+/{SubjectName}/{SessionName}/{ElectrodeID}/{CellID}/spt: spike
+times</pre>
+</div>
+<p>where curly brackets <cite>{}</cite> denote a group.</p>
+<p>This layout may be adjusted by changing paths</p>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">close</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">close_all</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.io.filters.PyTablesFilter.read_sp" title="spike_sort.io.filters.PyTablesFilter.read_sp"><tt class="xref py py-obj docutils literal"><span class="pre">read_sp</span></tt></a>(dataset)</td>
+<td>Read continous waveforms (EEG, LFG, spike waveform)</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#spike_sort.io.filters.PyTablesFilter.read_spt" title="spike_sort.io.filters.PyTablesFilter.read_spt"><tt class="xref py py-obj docutils literal"><span class="pre">read_spt</span></tt></a>(dataset)</td>
+<td>Read event times (such as spike or stimulus times).</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.io.filters.PyTablesFilter.write_sp" title="spike_sort.io.filters.PyTablesFilter.write_sp"><tt class="xref py py-obj docutils literal"><span class="pre">write_sp</span></tt></a>(sp_dict,&nbsp;dataset[,&nbsp;overwrite])</td>
+<td>Write signal</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#spike_sort.io.filters.PyTablesFilter.write_spt" title="spike_sort.io.filters.PyTablesFilter.write_spt"><tt class="xref py py-obj docutils literal"><span class="pre">write_spt</span></tt></a>(spt_dict,&nbsp;dataset[,&nbsp;overwrite])</td>
+<td>Write spike times</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="spike_sort.io.filters.PyTablesFilter.read_sp">
+<tt class="descname">read_sp</tt><big>(</big><em>dataset</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/io/filters.html#PyTablesFilter.read_sp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.io.filters.PyTablesFilter.read_sp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read continous waveforms (EEG, LFG, spike waveform)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>dataset</strong> : str</p>
+<blockquote class="last">
+<div><p>path pointing to cell node</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="spike_sort.io.filters.PyTablesFilter.read_spt">
+<tt class="descname">read_spt</tt><big>(</big><em>dataset</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/io/filters.html#PyTablesFilter.read_spt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.io.filters.PyTablesFilter.read_spt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read event times (such as spike or stimulus times).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>dataset</strong> : str</p>
+<blockquote class="last">
+<div><p>path pointing to cell node</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="spike_sort.io.filters.PyTablesFilter.write_sp">
+<tt class="descname">write_sp</tt><big>(</big><em>sp_dict</em>, <em>dataset</em>, <em>overwrite=False</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/io/filters.html#PyTablesFilter.write_sp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.io.filters.PyTablesFilter.write_sp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write signal</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spike_sort.io.filters.PyTablesFilter.write_spt">
+<tt class="descname">write_spt</tt><big>(</big><em>spt_dict</em>, <em>dataset</em>, <em>overwrite=False</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/io/filters.html#PyTablesFilter.write_spt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.io.filters.PyTablesFilter.write_spt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write spike times</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-spike_sort.io.export"></span><dl class="function">
+<dt id="spike_sort.io.export.export_cells">
+<tt class="descclassname">spike_sort.io.export.</tt><tt class="descname">export_cells</tt><big>(</big><em>io_filter</em>, <em>node_templ</em>, <em>spike_times</em>, <em>overwrite=False</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/io/export.html#export_cells"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.io.export.export_cells" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export discriminated spike times of all cells to a file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>io_filter</strong> : object,</p>
+<blockquote>
+<div><p>read/write filter object (see <a class="reference internal" href="#module-spike_sort.io.filters" title="spike_sort.io.filters"><tt class="xref py py-mod docutils literal"><span class="pre">spike_sort.io.filters</span></tt></a>)</p>
+</div></blockquote>
+<p><strong>node_templ</strong> : string</p>
+<blockquote>
+<div><p>string identifing the dataset name. It will be passed to
+IOFilters.write_spt method. It can contain the
+<cite>{cell_id}</cite> placeholder that will be substituted by cell
+identifier.</p>
+</div></blockquote>
+<p><strong>spt_dict</strong> : dict</p>
+<blockquote class="last">
+<div><p>dictionary in which keys are the cell IDs and values are spike
+times structures</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"> <img src="../_static/logo.png"
+type="image/png" /> </img> 
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">File I/O (<tt class="docutils literal"><span class="pre">spike_sort.io</span></tt>)</a><ul>
+<li><a class="reference internal" href="#read-write-filters-spike-sort-io-filters">Read/Write Filters (<tt class="docutils literal"><span class="pre">spike_sort.io.filters</span></tt>)</a></li>
+<li><a class="reference internal" href="#export-tools-spike-sort-io-export">Export tools (<tt class="docutils literal"><span class="pre">spike_sort.io.export</span></tt>)</a></li>
+<li><a class="reference internal" href="#module-spike_sort.io.filters">Reference</a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="evaluate.html" title="previous chapter">Evaluate (<tt class="docutils literal docutils literal docutils literal"><span class="pre">spike_sort.evaluate</span></tt>)</a></li>
+  </ul></li>
+</ul>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/modules/io.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div> 
+  <div class="footer">
+    &copy; Copyright 2011, Bartosz Telenczuk, Dmytro Bielievstsov.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

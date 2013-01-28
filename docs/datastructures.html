@@ -1,0 +1,399 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Data Structures &mdash; SpikeSort 0.13dev documentation</title>
+    
+    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.13dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="SpikeSort 0.13dev documentation" href="index.html" />
+    <link rel="next" title="Sample data files" href="datafiles.html" />
+    <link rel="prev" title="Using low-level interface" href="tutorials/tutorial_manual.html" /> 
+  </head>
+  <body>
+  
+  
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="np-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="datafiles.html" title="Sample data files"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tutorials/tutorial_manual.html" title="Using low-level interface"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">SpikeSort 0.13dev documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="data-structures">
+<h1>Data Structures<a class="headerlink" href="#data-structures" title="Permalink to this headline">¶</a></h1>
+<p id="raw-recording">To achieve best compatibility with external libraries most of the data
+structures are standard Python <em>dictionaries</em>, with at least one key &#8211; <cite>data</cite>. The
+<cite>data</cite> key contains the actual data in an array-like object (such as
+NumPy array). Other attributes provide metadata that are required by
+some methods.</p>
+<div class="section" id="id1">
+<h2>Raw recording<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>Raw electrophysiological data sampled at equally spaced time points. It
+can contain multiple channels, but all of them need to be of the same
+sampling frequency and duration (for example, multiple contacts of
+a tetrode).</p>
+<p>The following keys are defined:</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">data:</th><td class="field-body"><p class="first"><em>array</em>, required</p>
+<p>array-like object (for example <tt class="xref py py-class docutils literal"><span class="pre">numpy.ndarray</span></tt>) of
+dimensions (N_channels, N_samples)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">FS:</th><td class="field-body"><p class="first"><em>int</em>, required</p>
+<p>sampling frequency in Hz</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">n_contacts:</th><td class="field-body"><p class="first"><em>int</em>, required</p>
+<p class="last">number of channels (tetrode contacts). It is equal to the size
+of the first dimension of <cite>data</cite>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You may read/write the data with your own functions, but to make the
+interface with the SpikeSort a bit cleaner, you might also want to
+define your custom IO filters (see <a class="reference internal" href="modules/io.html#io-filters"><em>Read/Write Filters (spike_sort.io.filters)</em></a>)</p>
+</div>
+<p class="rubric">Example</p>
+<p>We will read the raw tetrode data from <a class="reference internal" href="datafiles.html#tutorial-data"><em>Tutorial data</em></a> using
+standard <a class="reference internal" href="modules/io.html#spike_sort.io.filters.PyTablesFilter" title="spike_sort.io.filters.PyTablesFilter"><tt class="xref py py-class docutils literal"><span class="pre">PyTablesFilter</span></tt></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">spike_sort.io.filters</span> <span class="kn">import</span> <span class="n">PyTablesFilter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">io_filter</span> <span class="o">=</span> <span class="n">PyTablesFilter</span><span class="p">(</span><span class="s">&#39;../data/tutorial.h5&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">raw_data</span> <span class="o">=</span> <span class="n">io_filter</span><span class="o">.</span><span class="n">read_sp</span><span class="p">(</span><span class="s">&#39;/SubjectA/session01/el1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>          <span class="c"># print all keys</span>
+<span class="go">[&#39;n_contacts&#39;, &#39;FS&#39;, &#39;data&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shape</span> <span class="o">=</span> <span class="n">raw_data</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span> <span class="c"># check size</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;{0} channels, {1} samples&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">4 channels, 23512500 samples</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">raw_data</span><span class="p">[</span><span class="s">&#39;FS&#39;</span><span class="p">])</span>    <span class="c"># check sampling frequency</span>
+<span class="go">25000</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="spike-times">
+<span id="id2"></span><h2>Spike times<a class="headerlink" href="#spike-times" title="Permalink to this headline">¶</a></h2>
+<p>A sequence of (sorted) time readings at which spikes were generated
+(or other discrete events happened).</p>
+<p>The data is store in a dictionary with following keys:</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">data:</th><td class="field-body"><p class="first"><em>array</em>, required</p>
+<p>one-dimensional array-like object with event times (in
+milliseconds)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">is_valid:</th><td class="field-body"><p class="first"><em>array</em>, optional</p>
+<p class="last">boolean area of the same size as <cite>data</cite> &#8211; if an element is False
+the event of the same index is masked (or invalid)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You may read/write the data with your own functions, but to make the
+interface with the SpikeSort a bit cleaner, you might also want to
+define your custom IO filters (see <a class="reference internal" href="modules/io.html#io-filters"><em>Read/Write Filters (spike_sort.io.filters)</em></a>)</p>
+</div>
+<p class="rubric">Example</p>
+<p><a class="reference internal" href="modules/extract.html#spike_sort.core.extract.detect_spikes" title="spike_sort.core.extract.detect_spikes"><tt class="xref py py-func docutils literal"><span class="pre">spike_sort.core.extract.detect_spikes()</span></tt></a> is one of functions
+which takes the raw recordings and returns spike times dictionary:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">raw_dict</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>      <span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]]),</span>
+<span class="gp">... </span>      <span class="s">&#39;FS&#39;</span>  <span class="p">:</span> <span class="mi">10000</span><span class="p">,</span>
+<span class="gp">... </span>      <span class="s">&#39;n_contacts&#39;</span><span class="p">:</span> <span class="mi">1</span>
+<span class="gp">... </span>           <span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">spike_sort.core.extract</span> <span class="kn">import</span> <span class="n">detect_spikes</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spt_dict</span> <span class="o">=</span> <span class="n">detect_spikes</span><span class="p">(</span><span class="n">raw_dict</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">spt_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="go">[&#39;thresh&#39;, &#39;contact&#39;, &#39;data&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="s">&#39;Spike times (ms): {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">spt_dict</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]))</span>
+<span class="go">Spike times (ms): [ 0.   0.4]</span>
+</pre></div>
+</div>
+<p>Note that in addition to the required data key,
+<a class="reference internal" href="modules/extract.html#spike_sort.core.extract.detect_spikes" title="spike_sort.core.extract.detect_spikes"><tt class="xref py py-func docutils literal"><span class="pre">detect_spikes()</span></tt></a>
+appends some extrcontact a attributes: <tt class="xref py py-attr docutils literal"><span class="pre">thresh</span></tt> (detection threshold)
+and <tt class="xref py py-attr docutils literal"><span class="pre">contact</span></tt> (contact on which spikes were detected). These
+attributes are ignored by other methods.</p>
+</div>
+<div class="section" id="spike-waveforms">
+<span id="spike-wave"></span><h2>Spike waveforms<a class="headerlink" href="#spike-waveforms" title="Permalink to this headline">¶</a></h2>
+<p>Spike waveform structure contains waveforms of extracted spikes. It may be
+any mapping data structure (usually a dictionary) with following keys:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">data:</th><td class="field-body"><p class="first"><em>array</em>, required</p>
+<p>three-dimensional array-like object of size (N_points, N_spikes,
+N_contacts), where:</p>
+<blockquote>
+<div><ul class="simple">
+<li><cite>N_points</cite> &#8211;  the number of data points in a single waveform,</li>
+<li><cite>N_spikes</cite> &#8211; the total number of spikes and</li>
+<li><cite>N_contacts</cite> &#8211; the number of independent channels (for example 4 in a
+tetrode)</li>
+</ul>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">time:</th><td class="field-body"><p class="first"><em>array</em>, required</p>
+<p>Timeline of the spike waveshapes (in miliseconds). It must be of
+the same size as the first dimension of data (<cite>n_pts</cite>).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">FS:</th><td class="field-body"><p class="first"><em>int</em>, optional</p>
+<p>Sampling frequency.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">n_contacts:</th><td class="field-body"><p class="first"><em>int</em>, optional</p>
+<p>Number of independent channels with spike
+waveshapes (see also <em class="xref std std-ref">raw_recording</em>).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">is_valid:</th><td class="field-body"><p class="first"><em>array</em>, optional</p>
+<p class="last">boolean area of the size of second dimension of <cite>data</cite> (N_spikes) &#8211; if an element is False
+the spike with the same index is masked (or invalid)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<p>Spike waveforms can be extracted from raw recordings (see <em class="xref std std-ref">raw_recording</em>)
+given a sequence of spike times (see <a class="reference internal" href="#spike-times"><em>Spike times</em></a>) by means of
+<a class="reference internal" href="modules/extract.html#spike_sort.core.extract.extract_spikes" title="spike_sort.core.extract.extract_spikes"><tt class="xref py py-func docutils literal"><span class="pre">spike_sort.core.extract.extract_spikes()</span></tt></a> function:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">spike_sort.core.extract</span> <span class="kn">import</span> <span class="n">extract_spikes</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">raw_dict</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>            <span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]),</span>
+<span class="gp">... </span>            <span class="s">&#39;FS&#39;</span>  <span class="p">:</span> <span class="mi">10000</span><span class="p">,</span>
+<span class="gp">... </span>            <span class="s">&#39;n_contacts&#39;</span><span class="p">:</span> <span class="mi">1</span>
+<span class="gp">... </span>           <span class="p">}</span>      <span class="c"># raw signal</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spt_dict</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>            <span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.65</span><span class="p">,</span> <span class="mi">1</span><span class="p">])}</span>
+<span class="gp">... </span>           <span class="p">}</span>      <span class="c"># timestamps of three spikes</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sp_win</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">]</span> <span class="c"># window in which spikes should be extracted</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">waves_dict</span> <span class="o">=</span> <span class="n">extract_spikes</span><span class="p">(</span><span class="n">raw_dict</span><span class="p">,</span> <span class="n">spt_dict</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now let us investigate the returned spike waveforms structure:</p>
+<ul>
+<li><p class="first">keys:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">waves_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="go">[&#39;is_valid&#39;, &#39;FS&#39;, &#39;data&#39;, &#39;time&#39;]</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">data array shape:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">waves_dict</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">(4, 3, 1)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">extracted spikes:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">waves_dict</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">][:,:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="c"># data contains three spikes</span>
+<span class="go">[[ 1.  1.  0.  0.]</span>
+<span class="go"> [ 1. -1.  0.  0.]</span>
+<span class="go"> [ 0.  0.  0.  0.]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">waves_dict</span><span class="p">[</span><span class="s">&#39;time&#39;</span><span class="p">])</span>          <span class="c"># defined over 4 time points</span>
+<span class="go">[ 0.   0.1  0.2  0.3]</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">and potential invalid (truncated spikes):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">waves_dict</span><span class="p">[</span><span class="s">&#39;is_valid&#39;</span><span class="p">])</span>     <span class="c"># last spike is invalid (truncated)</span>
+<span class="go">[ True True False]</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>Note that the <tt class="xref py py-attr docutils literal"><span class="pre">is_valid</span></tt> element of truncated spike is
+<tt class="xref py py-data docutils literal"><span class="pre">False</span></tt>.</p>
+</div>
+<div class="section" id="spike-features">
+<span id="id3"></span><h2>Spike features<a class="headerlink" href="#spike-features" title="Permalink to this headline">¶</a></h2>
+<p>This data structure contains features calculated from spike waveforms
+using one of the methods defined in <a class="reference internal" href="modules/features.html#module-spike_sort.core.features" title="spike_sort.core.features"><tt class="xref py py-mod docutils literal"><span class="pre">spike_sort.core.features</span></tt></a> module
+(one of the <tt class="xref py py-func docutils literal"><span class="pre">fet*()</span></tt> functions, see <a class="reference internal" href="modules/features.html#features-doc"><em>Features</em></a>).</p>
+<p>The spike features dictionary consits of following keys:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">data:</th><td class="field-body"><p class="first"><em>array</em>, required</p>
+<p>two-dimensional array of size (N_spikes, N_features) that contains
+the actual feature values</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">names:</th><td class="field-body"><p class="first"><em>list of str</em>, required</p>
+<p>list of length N_features containing feature labels</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">is_valid:</th><td class="field-body"><p class="first"><em>array</em>, optional</p>
+<p class="last">boolean area of of length N_spikes; if an element is False
+the spike with the same index is masked (or invalid, see also
+<a class="reference internal" href="#spike-wave"><em>Spike waveforms</em></a>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<p>Let us try to calculate peak-to-peak amplitude from some spikes
+extracted in <a class="reference internal" href="#spike-wave"><em>Spike waveforms</em></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">spike_sort.core.features</span> <span class="kn">import</span> <span class="n">fetP2P</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">waves_dict</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c"># 3 spikes, 4 data points each</span>
+<span class="go">(4, 3, 1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">feature_dict</span> <span class="o">=</span> <span class="n">fetP2P</span><span class="p">(</span><span class="n">waves_dict</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">feature_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="go">[&#39;is_valid&#39;, &#39;data&#39;, &#39;names&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">feature_dict</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">(3, 1)</span>
+</pre></div>
+</div>
+<p>Then we have one feature for 3 spikes. Let check whether the peak-to-peak amplitudes
+are correctly calculated:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">feature_dict</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">])</span>
+<span class="go">[[ 1.]</span>
+<span class="go"> [ 2.]</span>
+<span class="go"> [ 0.]]</span>
+</pre></div>
+</div>
+<p>as expected (compare with example above). There is only one
+peak-to-peak (<cite>P2P</cite>) feature on a single channel (<cite>Ch0</cite>) and its name
+is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">feature_dict</span><span class="p">[</span><span class="s">&#39;names&#39;</span><span class="p">])</span>
+<span class="go">[&#39;Ch0:P2P&#39;]</span>
+</pre></div>
+</div>
+<p>The mask array is inherited from <tt class="xref py py-data docutils literal"><span class="pre">waves_dict</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">feature_dict</span><span class="p">[</span><span class="s">&#39;is_valid&#39;</span><span class="p">])</span>
+<span class="go">[ True True False]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="spike-labels">
+<span id="id4"></span><h2>Spike labels<a class="headerlink" href="#spike-labels" title="Permalink to this headline">¶</a></h2>
+<p>Spike labels are the identifiers of a cell (unit) each spike was
+classified to. Spike labels are <strong>not</strong> dictionaries, but arrays of
+integers &#8211; one cluster index per spike.</p>
+<p class="rubric">Example</p>
+<p>Let us try to cluster the spikes described by <cite>Sample</cite> feature using
+K-means with K=2:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">spike_sort.core.cluster</span> <span class="kn">import</span> <span class="n">cluster</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">feature_dict</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>                 <span class="s">&#39;data&#39;</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">],[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">]]),</span>
+<span class="gp">... </span>                 <span class="s">&#39;names&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&#39;Sample&#39;</span><span class="p">]</span>
+<span class="gp">... </span>               <span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">labels</span> <span class="o">=</span> <span class="n">cluster</span><span class="p">(</span><span class="s">&#39;k_means&#39;</span><span class="p">,</span> <span class="n">feature_dict</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+<span class="go">[1 0 1]</span>
+</pre></div>
+</div>
+<p>As expected <tt class="xref py py-data docutils literal"><span class="pre">labels</span></tt> is an array describing two clusters: 0 and 1.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"> <img src="_static/logo.png"
+type="image/png" /> </img> 
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Data Structures</a><ul>
+<li><a class="reference internal" href="#id1">Raw recording</a></li>
+<li><a class="reference internal" href="#spike-times">Spike times</a></li>
+<li><a class="reference internal" href="#spike-waveforms">Spike waveforms</a></li>
+<li><a class="reference internal" href="#spike-features">Spike features</a></li>
+<li><a class="reference internal" href="#spike-labels">Spike labels</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="tutorials/tutorial_manual.html" title="previous chapter">Using low-level interface</a></li>
+      <li>Next: <a href="datafiles.html" title="next chapter">Sample data files</a></li>
+  </ul></li>
+</ul>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/datastructures.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div> 
+  <div class="footer">
+    &copy; Copyright 2011, Bartosz Telenczuk, Dmytro Bielievstsov.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

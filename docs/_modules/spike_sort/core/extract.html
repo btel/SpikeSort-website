@@ -1,0 +1,457 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>spike_sort.core.extract &mdash; SpikeSort 0.13dev documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.13dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="SpikeSort 0.13dev documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+  
+  
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../../np-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">SpikeSort 0.13dev documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for spike_sort.core.extract</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c">#coding=utf-8</span>
+
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+
+
+<div class="viewcode-block" id="split_cells"><a class="viewcode-back" href="../../../modules/extract.html#spike_sort.core.extract.split_cells">[docs]</a><span class="k">def</span> <span class="nf">split_cells</span><span class="p">(</span><span class="n">spikes</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the spike features splitted into separate cells</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">which</span> <span class="o">==</span> <span class="s">&#39;all&#39;</span><span class="p">:</span>
+        <span class="n">classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">classes</span> <span class="o">=</span> <span class="n">which</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">spikes</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">spikes</span><span class="p">[</span><span class="s">&#39;time&#39;</span><span class="p">]</span>
+    <span class="n">spikes_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">cl</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">idx</span> <span class="o">==</span> <span class="n">cl</span><span class="p">,</span> <span class="p">:],</span> <span class="s">&#39;time&#39;</span><span class="p">:</span> <span class="n">time</span><span class="p">})</span>
+                        <span class="k">for</span> <span class="n">cl</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">spikes_dict</span>
+
+</div>
+<div class="viewcode-block" id="remove_spikes"><a class="viewcode-back" href="../../../modules/extract.html#spike_sort.core.extract.remove_spikes">[docs]</a><span class="k">def</span> <span class="nf">remove_spikes</span><span class="p">(</span><span class="n">spt_dict</span><span class="p">,</span> <span class="n">remove_dict</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Remove spikes with given spike times from the spike time</span>
+<span class="sd">    structure &quot;&quot;&quot;</span>
+    <span class="n">spt_data</span> <span class="o">=</span> <span class="n">spt_dict</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">spt_remove</span> <span class="o">=</span> <span class="n">remove_dict</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+
+    <span class="n">mn</span><span class="p">,</span> <span class="n">mx</span> <span class="o">=</span> <span class="n">tolerance</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">spt_remove</span><span class="p">:</span>
+        <span class="n">spt_data</span> <span class="o">=</span> <span class="n">spt_data</span><span class="p">[(</span><span class="n">spt_data</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">t</span> <span class="o">+</span> <span class="n">mx</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">spt_data</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">t</span> <span class="o">+</span> <span class="n">mn</span><span class="p">))]</span>
+
+    <span class="n">spt_ret</span> <span class="o">=</span> <span class="n">spt_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">spt_ret</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spt_data</span>
+    <span class="k">return</span> <span class="n">spt_ret</span>
+
+</div>
+<div class="viewcode-block" id="detect_spikes"><a class="viewcode-back" href="../../../modules/extract.html#spike_sort.core.extract.detect_spikes">[docs]</a><span class="k">def</span> <span class="nf">detect_spikes</span><span class="p">(</span><span class="n">spike_data</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="s">&#39;auto&#39;</span><span class="p">,</span> <span class="n">edge</span><span class="o">=</span><span class="s">&quot;rising&quot;</span><span class="p">,</span>
+                  <span class="n">contact</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;Detects spikes in extracellular data using amplitude thresholding.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spike_data : dict</span>
+<span class="sd">        extracellular waveforms</span>
+<span class="sd">    thresh : float or &#39;auto&#39;</span>
+<span class="sd">        threshold for detection. if thresh is &#39;auto&#39; it will be</span>
+<span class="sd">        estimated from the data.</span>
+<span class="sd">    edge : {&#39;rising&#39;, &#39;falling&#39;}</span>
+<span class="sd">        which edge to trigger on</span>
+<span class="sd">    contact : int, optional</span>
+<span class="sd">        index of tetrode contact to use for detection, defaults to</span>
+<span class="sd">        first contact</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    spt_dict : dict</span>
+<span class="sd">        dictionary with &#39;data&#39; key which contains detected threshold</span>
+<span class="sd">        crossing in miliseconds</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sp_data</span> <span class="o">=</span> <span class="n">spike_data</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">][</span><span class="n">contact</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">n_contacts</span> <span class="o">=</span> <span class="n">spike_data</span><span class="p">[</span><span class="s">&#39;n_contacts&#39;</span><span class="p">]</span>
+
+    <span class="c">#if n_contacts&gt;1:</span>
+    <span class="c">#    sp_data = sp_data[:,contact]</span>
+
+    <span class="n">FS</span> <span class="o">=</span> <span class="n">spike_data</span><span class="p">[</span><span class="s">&#39;FS&#39;</span><span class="p">]</span>
+
+    <span class="n">edges</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;rising&#39;</span><span class="p">,</span> <span class="s">&#39;max&#39;</span><span class="p">,</span> <span class="s">&#39;falling&#39;</span><span class="p">,</span> <span class="s">&#39;min&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thresh</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">thresh</span> <span class="o">==</span> <span class="s">&#39;auto&#39;</span><span class="p">:</span>
+            <span class="n">thresh_frac</span> <span class="o">=</span> <span class="mf">8.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">thresh_frac</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">thresh</span><span class="p">)</span>
+
+        <span class="n">thresh</span> <span class="o">=</span> <span class="n">thresh_frac</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sp_data</span><span class="p">[:</span><span class="mi">10</span> <span class="o">*</span> <span class="n">FS</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">[</span><span class="mi">2</span><span class="p">:]:</span>
+            <span class="n">thresh</span> <span class="o">=</span> <span class="o">-</span><span class="n">thresh</span>
+
+    <span class="k">if</span> <span class="n">edge</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;&#39;edge&#39; parameter must be &#39;rising&#39; or &#39;falling&#39;&quot;</span><span class="p">)</span>
+    
+    <span class="n">op1</span><span class="p">,</span> <span class="n">op2</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">lt</span><span class="p">,</span> <span class="n">operator</span><span class="o">.</span><span class="n">gt</span>
+
+    <span class="k">if</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">[</span><span class="mi">2</span><span class="p">:]:</span>
+        <span class="n">op1</span><span class="p">,</span> <span class="n">op2</span> <span class="o">=</span> <span class="n">op2</span><span class="p">,</span> <span class="n">op1</span>
+
+    <span class="n">i</span><span class="p">,</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">op1</span><span class="p">(</span><span class="n">sp_data</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">thresh</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">op2</span><span class="p">(</span><span class="n">sp_data</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">thresh</span><span class="p">))</span>      
+
+    <span class="n">spt</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="mf">1000.0</span> <span class="o">/</span> <span class="n">FS</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="n">spt</span><span class="p">,</span> <span class="s">&#39;thresh&#39;</span><span class="p">:</span> <span class="n">thresh</span><span class="p">,</span> <span class="s">&#39;contact&#39;</span><span class="p">:</span> <span class="n">contact</span><span class="p">}</span>
+
+</div>
+<div class="viewcode-block" id="filter_spt"><a class="viewcode-back" href="../../../modules/extract.html#spike_sort.core.extract.filter_spt">[docs]</a><span class="k">def</span> <span class="nf">filter_spt</span><span class="p">(</span><span class="n">spike_data</span><span class="p">,</span> <span class="n">spt_dict</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">):</span>
+    <span class="n">spt</span> <span class="o">=</span> <span class="n">spt_dict</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">sp_data</span> <span class="o">=</span> <span class="n">spike_data</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">FS</span> <span class="o">=</span> <span class="n">spike_data</span><span class="p">[</span><span class="s">&#39;FS&#39;</span><span class="p">]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">n_pts</span> <span class="o">=</span> <span class="n">sp_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="n">n_pts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sp_data</span><span class="p">)</span>
+    <span class="n">max_time</span> <span class="o">=</span> <span class="n">n_pts</span> <span class="o">*</span> <span class="mf">1000.0</span> <span class="o">/</span> <span class="n">FS</span>
+
+    <span class="n">t_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">((</span><span class="o">-</span><span class="n">sp_win</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">t_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">((</span><span class="n">max_time</span><span class="p">,</span> <span class="n">max_time</span> <span class="o">-</span> <span class="n">sp_win</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">idx</span><span class="p">,</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">((</span><span class="n">spt</span> <span class="o">&gt;=</span> <span class="n">t_min</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">spt</span> <span class="o">&lt;=</span> <span class="n">t_max</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">idx</span>
+
+</div>
+<div class="viewcode-block" id="extract_spikes"><a class="viewcode-back" href="../../../modules/extract.html#spike_sort.core.extract.extract_spikes">[docs]</a><span class="k">def</span> <span class="nf">extract_spikes</span><span class="p">(</span><span class="n">spike_data</span><span class="p">,</span> <span class="n">spt_dict</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">,</span>
+                   <span class="n">resample</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">contacts</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Extract spikes from recording.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spike_data : dict</span>
+<span class="sd">       extracellular data (see :ref:`raw_recording`)</span>
+<span class="sd">    spt : dict</span>
+<span class="sd">       spike times structure (see :ref:`spike_times`)</span>
+<span class="sd">    sp_win : list of int</span>
+<span class="sd">       temporal extent of the wave shape</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    wavedict : dict</span>
+<span class="sd">       spike waveforms structure (see :ref:`spike_wave`)</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sp_data</span> <span class="o">=</span> <span class="n">spike_data</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">n_contacts</span> <span class="o">=</span> <span class="n">spike_data</span><span class="p">[</span><span class="s">&#39;n_contacts&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">contacts</span> <span class="o">==</span> <span class="s">&quot;all&quot;</span><span class="p">:</span>
+        <span class="n">contacts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_contacts</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">contacts</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">contacts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">contacts</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">contacts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">contacts</span><span class="p">)</span>
+
+    <span class="n">FS</span> <span class="o">=</span> <span class="n">spike_data</span><span class="p">[</span><span class="s">&#39;FS&#39;</span><span class="p">]</span>
+    <span class="n">spt</span> <span class="o">=</span> <span class="n">spt_dict</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spt</span><span class="p">))</span>
+    <span class="n">inner_idx</span> <span class="o">=</span> <span class="n">filter_spt</span><span class="p">(</span><span class="n">spike_data</span><span class="p">,</span> <span class="n">spt_dict</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">)</span>
+    <span class="n">outer_idx</span> <span class="o">=</span> <span class="n">idx</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">inner_idx</span><span class="p">)</span> <span class="o">==</span> <span class="bp">False</span><span class="p">]</span>
+
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">(</span><span class="n">spt</span> <span class="o">/</span> <span class="mf">1000.0</span> <span class="o">*</span> <span class="n">FS</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">win</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">sp_win</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1000.0</span> <span class="o">*</span> <span class="n">FS</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">win</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">win</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1000.0</span> <span class="o">/</span> <span class="n">FS</span> <span class="o">+</span> <span class="n">sp_win</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">n_contacts</span><span class="p">,</span> <span class="n">n_pts</span> <span class="o">=</span> <span class="n">sp_data</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="c"># auxiliary function to find a valid spike window within data range</span>
+    <span class="n">minmax</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">n_pts</span><span class="p">,</span> <span class="n">x</span><span class="p">]),</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">spWave</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">spt</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">contacts</span><span class="p">)),</span>
+                      <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inner_idx</span><span class="p">:</span>
+        <span class="n">sp</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">spWave</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">sp_data</span><span class="p">[</span><span class="n">contacts</span><span class="p">,</span>
+                                                <span class="n">sp</span> <span class="o">+</span> <span class="n">win</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">sp</span> <span class="o">+</span> <span class="n">win</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">outer_idx</span><span class="p">:</span>
+        <span class="n">sp</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">l</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">minmax</span><span class="p">,</span> <span class="n">sp</span> <span class="o">+</span> <span class="n">win</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">l</span> <span class="o">!=</span> <span class="n">r</span><span class="p">:</span>
+            <span class="n">spWave</span><span class="p">[(</span><span class="n">l</span> <span class="o">-</span> <span class="n">sp</span><span class="p">)</span> <span class="o">-</span> <span class="n">win</span><span class="p">[</span><span class="mi">0</span><span class="p">]:(</span><span class="n">r</span> <span class="o">-</span> <span class="n">sp</span><span class="p">)</span> <span class="o">-</span> <span class="n">win</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">sp_data</span><span class="p">[</span><span class="n">contacts</span><span class="p">,</span> <span class="n">l</span><span class="p">:</span><span class="n">r</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="n">wavedict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;data&quot;</span><span class="p">:</span> <span class="n">spWave</span><span class="p">,</span> <span class="s">&quot;time&quot;</span><span class="p">:</span> <span class="n">time</span><span class="p">,</span> <span class="s">&quot;FS&quot;</span><span class="p">:</span> <span class="n">FS</span><span class="p">}</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">inner_idx</span><span class="p">):</span>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spt</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+        <span class="n">is_valid</span><span class="p">[</span><span class="n">inner_idx</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">wavedict</span><span class="p">[</span><span class="s">&#39;is_valid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">is_valid</span>
+
+    <span class="k">if</span> <span class="n">resample</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">warn</span><span class="p">(</span><span class="s">&quot;resample argument is deprecated.&quot;</span>
+             <span class="s">&quot;Please update your code to use function&quot;</span>
+             <span class="s">&quot;resample_spikes&quot;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
+        <span class="n">wavedict</span> <span class="o">=</span> <span class="n">resample_spikes</span><span class="p">(</span><span class="n">wavedict</span><span class="p">,</span> <span class="n">FS</span> <span class="o">*</span> <span class="n">resample</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wavedict</span>
+
+</div>
+<div class="viewcode-block" id="resample_spikes"><a class="viewcode-back" href="../../../modules/extract.html#spike_sort.core.extract.resample_spikes">[docs]</a><span class="k">def</span> <span class="nf">resample_spikes</span><span class="p">(</span><span class="n">spikes_dict</span><span class="p">,</span> <span class="n">FS_new</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Upsample spike waveforms using spline interpolation&quot;&quot;&quot;</span>
+
+    <span class="n">sp_waves</span> <span class="o">=</span> <span class="n">spikes_dict</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">spikes_dict</span><span class="p">[</span><span class="s">&#39;time&#39;</span><span class="p">]</span>
+    <span class="n">FS</span> <span class="o">=</span> <span class="n">spikes_dict</span><span class="p">[</span><span class="s">&#39;FS&#39;</span><span class="p">]</span>
+
+    <span class="n">resamp_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mf">1000.0</span> <span class="o">/</span> <span class="n">FS_new</span><span class="p">)</span>
+    <span class="n">n_pts</span><span class="p">,</span> <span class="n">n_spikes</span><span class="p">,</span> <span class="n">n_contacts</span> <span class="o">=</span> <span class="n">sp_waves</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="n">spike_resamp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">resamp_time</span><span class="p">),</span> <span class="n">n_spikes</span><span class="p">,</span> <span class="n">n_contacts</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_spikes</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">contact</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_contacts</span><span class="p">):</span>
+            <span class="n">tck</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">splrep</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">sp_waves</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">contact</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">spike_resamp</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">contact</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">splev</span><span class="p">(</span><span class="n">resamp_time</span><span class="p">,</span> <span class="n">tck</span><span class="p">,</span> <span class="n">der</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s">&quot;data&quot;</span><span class="p">:</span> <span class="n">spike_resamp</span><span class="p">,</span> <span class="s">&quot;time&quot;</span><span class="p">:</span> <span class="n">resamp_time</span><span class="p">,</span> <span class="s">&quot;FS&quot;</span><span class="p">:</span> <span class="n">FS</span><span class="p">}</span>
+
+</div>
+<div class="viewcode-block" id="align_spikes"><a class="viewcode-back" href="../../../modules/extract.html#spike_sort.core.extract.align_spikes">[docs]</a><span class="k">def</span> <span class="nf">align_spikes</span><span class="p">(</span><span class="n">spike_data</span><span class="p">,</span> <span class="n">spt_dict</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s">&quot;max&quot;</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">contact</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Aligns spike waves and returns corrected spike times</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spike_data : dict</span>
+<span class="sd">    spt_dict : dict</span>
+<span class="sd">    sp_win : list of int</span>
+<span class="sd">    type : {&#39;max&#39;, &#39;min&#39;}, optional</span>
+<span class="sd">    resample : int, optional</span>
+<span class="sd">    contact : int, optional</span>
+<span class="sd">    remove : bool, optiona</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ret_dict : dict</span>
+<span class="sd">       spike times of aligned spikes</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">tol</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">sp_win</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&gt;-</span><span class="n">tol</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">sp_win</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&lt;</span><span class="n">tol</span><span class="p">):</span>
+        <span class="n">warn</span><span class="p">(</span><span class="s">&#39;You are using very short sp_win. This may lead to alignment problems.&#39;</span><span class="p">)</span>
+
+    <span class="n">spt</span> <span class="o">=</span> <span class="n">spt_dict</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">idx_align</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spt</span><span class="p">))</span>
+    <span class="c">#spt_align = {&#39;data&#39;: spt}</span>
+
+    <span class="c">#go in a loop until all spikes are correctly aligned</span>
+    <span class="n">iter_id</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx_align</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">spt_align</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="n">spt</span><span class="p">[</span><span class="n">idx_align</span><span class="p">]}</span>
+        <span class="n">spt_inbound</span> <span class="o">=</span> <span class="n">filter_spt</span><span class="p">(</span><span class="n">spike_data</span><span class="p">,</span> <span class="n">spt_align</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">)</span>
+        <span class="n">idx_align</span> <span class="o">=</span> <span class="n">idx_align</span><span class="p">[</span><span class="n">spt_inbound</span><span class="p">]</span>
+        <span class="c">#spt_align = {&#39;data&#39;: spt[idx_align]}</span>
+        <span class="n">sp_waves_dict</span> <span class="o">=</span> <span class="n">extract_spikes</span><span class="p">(</span><span class="n">spike_data</span><span class="p">,</span> <span class="n">spt_align</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">,</span>
+                                       <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">,</span> <span class="n">contacts</span><span class="o">=</span><span class="n">contact</span><span class="p">)</span>
+
+        <span class="n">sp_waves</span> <span class="o">=</span> <span class="n">sp_waves_dict</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">][:,</span> <span class="n">spt_inbound</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="c">#if sp_waves_dict.has_key(&#39;is_valid&#39;):</span>
+        <span class="c">#    sp_waves = sp_waves[:, sp_waves_dict[&#39;is_valid&#39;]]</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">sp_waves_dict</span><span class="p">[</span><span class="s">&#39;time&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s">&quot;max&quot;</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">sp_waves</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s">&quot;min&quot;</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">sp_waves</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c">#move spike markers</span>
+        <span class="n">shift</span> <span class="o">=</span> <span class="n">time</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">spt</span><span class="p">[</span><span class="n">idx_align</span><span class="p">]</span> <span class="o">+=</span> <span class="n">shift</span>
+
+        <span class="c">#if spike maximum/minimum was at the edge we have to extract it at the</span>
+        <span class="c"># new marker and repeat the alignment</span>
+
+        <span class="n">idx_align</span> <span class="o">=</span> <span class="n">idx_align</span><span class="p">[(</span><span class="n">shift</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">sp_win</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">tol</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">shift</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">sp_win</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">tol</span><span class="p">))]</span>
+        <span class="n">iter_id</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c">#print &quot;Align. iteration %d, remaining idx %d&quot; % (iter_id, len(idx_align))</span>
+        <span class="c">#print shift</span>
+
+    <span class="n">ret_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="n">spt</span><span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">remove</span><span class="p">:</span>
+        <span class="c">#remove double spikes</span>
+        <span class="n">FS</span> <span class="o">=</span> <span class="n">spike_data</span><span class="p">[</span><span class="s">&#39;FS&#39;</span><span class="p">]</span>
+        <span class="n">ret_dict</span> <span class="o">=</span> <span class="n">remove_doubles</span><span class="p">(</span><span class="n">ret_dict</span><span class="p">,</span> <span class="mf">1000.0</span> <span class="o">/</span> <span class="n">FS</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret_dict</span>
+
+</div>
+<div class="viewcode-block" id="remove_doubles"><a class="viewcode-back" href="../../../modules/extract.html#spike_sort.core.extract.remove_doubles">[docs]</a><span class="k">def</span> <span class="nf">remove_doubles</span><span class="p">(</span><span class="n">spt_dict</span><span class="p">,</span> <span class="n">tol</span><span class="p">):</span>
+    <span class="n">new_dict</span> <span class="o">=</span> <span class="n">spt_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">spt</span> <span class="o">=</span> <span class="n">spt_dict</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+
+    <span class="n">isi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">spt</span><span class="p">)</span>
+    <span class="n">intisi</span> <span class="o">=</span> <span class="p">(</span><span class="n">isi</span><span class="o">/</span><span class="n">tol</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;int&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">spt</span> <span class="o">=</span> <span class="n">spt</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(([</span><span class="bp">True</span><span class="p">],</span> <span class="n">intisi</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">))]</span>
+
+    <span class="n">new_dict</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spt</span>
+    <span class="k">return</span> <span class="n">new_dict</span>
+
+</div>
+<div class="viewcode-block" id="merge_spikes"><a class="viewcode-back" href="../../../modules/extract.html#spike_sort.core.extract.merge_spikes">[docs]</a><span class="k">def</span> <span class="nf">merge_spikes</span><span class="p">(</span><span class="n">spike_waves1</span><span class="p">,</span> <span class="n">spike_waves2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Merges two sets of spike waves</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    spike_waves1 : dict</span>
+<span class="sd">    spike_waves2 : dict</span>
+<span class="sd">        spike wavefroms to merge; both spike wave sets must be defined</span>
+<span class="sd">        within the same time window and with the same sampling</span>
+<span class="sd">        frequency</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    spike_waves : dict</span>
+<span class="sd">        merged spike waveshapes</span>
+
+<span class="sd">    clust_idx : array</span>
+<span class="sd">        labels denoting to which set the given spike originally belonged to</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sp_data1</span> <span class="o">=</span> <span class="n">spike_waves1</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">sp_data2</span> <span class="o">=</span> <span class="n">spike_waves2</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+
+    <span class="n">sp_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">sp_data1</span><span class="p">,</span> <span class="n">sp_data2</span><span class="p">))</span>
+    <span class="n">spike_waves</span> <span class="o">=</span> <span class="n">spike_waves1</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">spike_waves</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sp_data</span>
+
+    <span class="n">clust_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">sp_data1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                               <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sp_data2</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+
+    <span class="k">return</span> <span class="n">spike_waves</span><span class="p">,</span> <span class="n">clust_idx</span>
+
+</div>
+<div class="viewcode-block" id="merge_spiketimes"><a class="viewcode-back" href="../../../modules/extract.html#spike_sort.core.extract.merge_spiketimes">[docs]</a><span class="k">def</span> <span class="nf">merge_spiketimes</span><span class="p">(</span><span class="n">spt1</span><span class="p">,</span> <span class="n">spt2</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Merges two sets of spike times</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spt1 : dict</span>
+<span class="sd">    spt2 : dict</span>
+<span class="sd">    sort : bool, optional</span>
+<span class="sd">        False if you don&#39;t want to be the spike times sorted.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    spt : dict</span>
+<span class="sd">        dictionary with merged spike time arrrays under data key</span>
+<span class="sd">    clust_idx : array</span>
+<span class="sd">        labels denoting to which set the given spike originally belonged</span>
+<span class="sd">        to</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">spt_data1</span> <span class="o">=</span> <span class="n">spt1</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">spt_data2</span> <span class="o">=</span> <span class="n">spt2</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+
+    <span class="n">spt_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">spt_data1</span><span class="p">,</span> <span class="n">spt_data2</span><span class="p">))</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">spt_data</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+    <span class="n">spt_data</span> <span class="o">=</span> <span class="n">spt_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="n">clust_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">spt_data1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                               <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">spt_data2</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+    <span class="n">clust_idx</span> <span class="o">=</span> <span class="n">clust_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">spt_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;data&quot;</span><span class="p">:</span> <span class="n">spt_data</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">spt_dict</span><span class="p">,</span> <span class="n">clust_idx</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"> <img src="../../../_static/logo.png"
+type="image/png" /> </img> <h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div> 
+  <div class="footer">
+    &copy; Copyright 2011, Bartosz Telenczuk, Dmytro Bielievstsov.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

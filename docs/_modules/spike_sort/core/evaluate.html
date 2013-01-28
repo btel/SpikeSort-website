@@ -1,0 +1,335 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>spike_sort.core.evaluate &mdash; SpikeSort 0.13dev documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.13dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="SpikeSort 0.13dev documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+  
+  
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../../np-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">SpikeSort 0.13dev documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for spike_sort.core.evaluate</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c">#coding=utf-8</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">extract</span><span class="o">,</span> <span class="nn">cluster</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="k">def</span> <span class="nf">deprecation</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<div class="viewcode-block" id="snr_spike"><a class="viewcode-back" href="../../../modules/evaluate.html#spike_sort.core.evaluate.snr_spike">[docs]</a><span class="k">def</span> <span class="nf">snr_spike</span><span class="p">(</span><span class="n">spike_waves</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">5.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Estimate signal-to-noise ratio (SNR) as a ratio of</span>
+<span class="sd">    peak-to-peak amplitude of an average spike to the std. deviation</span>
+<span class="sd">    of residuals</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spike_waves : dict</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    snr : float</span>
+<span class="sd">        signal to noise ratio</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sp_data</span> <span class="o">=</span> <span class="n">spike_waves</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">avg_spike</span> <span class="o">=</span> <span class="n">sp_data</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">peak_to_peak</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="n">avg_spike</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">residuals</span> <span class="o">=</span> <span class="n">sp_data</span> <span class="o">-</span> <span class="n">avg_spike</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+    <span class="n">noise_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">residuals</span><span class="o">.</span><span class="n">var</span><span class="p">())</span>
+    <span class="n">snr</span> <span class="o">=</span> <span class="n">peak_to_peak</span> <span class="o">/</span> <span class="p">(</span><span class="n">noise_std</span> <span class="o">*</span> <span class="n">scale</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">snr</span>
+</div>
+<div class="viewcode-block" id="snr_clust"><a class="viewcode-back" href="../../../modules/evaluate.html#spike_sort.core.evaluate.snr_clust">[docs]</a><span class="k">def</span> <span class="nf">snr_clust</span><span class="p">(</span><span class="n">spike_waves</span><span class="p">,</span> <span class="n">noise_waves</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate signal-to-noise ratio.</span>
+<span class="sd">    </span>
+<span class="sd">    Comparing average P2P amplitude of spike cluster to noise cluster</span>
+<span class="sd">    (randomly selected signal segments)</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spike_waves : dict</span>
+<span class="sd">    noise_waves : dict</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    snr : float</span>
+<span class="sd">        signal-to-noise ratio</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_calc_p2p</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="n">sp_data</span> <span class="o">=</span> <span class="n">spike_waves</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">avg_p2p_spk</span> <span class="o">=</span> <span class="n">_calc_p2p</span><span class="p">(</span><span class="n">sp_data</span><span class="p">)</span>
+
+    <span class="n">noise_data</span> <span class="o">=</span> <span class="n">noise_waves</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">avg_p2p_ns</span> <span class="o">=</span> <span class="n">_calc_p2p</span><span class="p">(</span><span class="n">noise_data</span><span class="p">)</span>
+
+    <span class="n">snr</span> <span class="o">=</span> <span class="n">avg_p2p_spk</span> <span class="o">/</span> <span class="n">avg_p2p_ns</span>
+
+    <span class="k">return</span> <span class="n">snr</span>
+</div>
+<span class="k">def</span> <span class="nf">extract_noise_cluster</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">spt</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s">&quot;positive&quot;</span><span class="p">):</span>
+
+
+    <span class="n">deprecation</span><span class="p">(</span><span class="s">&quot;extract_noise_cluster deprecated. Use&quot;</span>
+                <span class="s">&quot; detect_noise and extract_spikes instead.&quot;</span><span class="p">)</span>
+    <span class="n">spt_noise</span> <span class="o">=</span> <span class="n">detect_noise_spikes</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">spt</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span>
+    <span class="n">sp_waves</span> <span class="o">=</span> <span class="n">extract</span><span class="o">.</span><span class="n">extract_spikes</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">spt_noise</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sp_waves</span>
+
+<span class="k">def</span> <span class="nf">rand_sample_spt</span><span class="p">(</span><span class="n">spt</span><span class="p">,</span> <span class="n">max_spikes</span><span class="p">):</span>
+    <span class="n">n_spikes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">spt</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">])</span>
+    <span class="n">spt_data</span> <span class="o">=</span> <span class="n">spt</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">spt_new</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">max_spikes</span> <span class="ow">and</span> <span class="n">n_spikes</span><span class="o">&gt;</span><span class="n">max_spikes</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n_spikes</span><span class="p">)</span><span class="o">.</span><span class="n">argsort</span><span class="p">()[:</span><span class="n">max_spikes</span><span class="p">]</span>
+        <span class="n">spt_new</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spt_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">spt_new</span>
+
+
+<div class="viewcode-block" id="detect_noise"><a class="viewcode-back" href="../../../modules/evaluate.html#spike_sort.core.evaluate.detect_noise">[docs]</a><span class="k">def</span> <span class="nf">detect_noise</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">spt</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s">&quot;positive&quot;</span><span class="p">,</span> <span class="n">max_spikes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">resample</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find noisy spikes&quot;&quot;&quot;</span>
+
+    <span class="n">spike_waves</span> <span class="o">=</span> <span class="n">extract</span><span class="o">.</span><span class="n">extract_spikes</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">spt</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s">&quot;positive&quot;</span><span class="p">:</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="n">calc_noise_threshold</span><span class="p">(</span><span class="n">spike_waves</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">spt_noise</span> <span class="o">=</span> <span class="n">extract</span><span class="o">.</span><span class="n">detect_spikes</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="s">&#39;rising&#39;</span><span class="p">)</span>
+        <span class="n">spt_noise</span> <span class="o">=</span> <span class="n">rand_sample_spt</span><span class="p">(</span><span class="n">spt_noise</span><span class="p">,</span> <span class="n">max_spikes</span><span class="p">)</span>
+        <span class="n">spt_noise</span> <span class="o">=</span> <span class="n">extract</span><span class="o">.</span><span class="n">remove_spikes</span><span class="p">(</span><span class="n">spt_noise</span><span class="p">,</span> <span class="n">spt</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">)</span>
+        <span class="n">spt_noise</span> <span class="o">=</span> <span class="n">extract</span><span class="o">.</span><span class="n">align_spikes</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">spt_noise</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">,</span> <span class="s">&#39;max&#39;</span><span class="p">,</span>
+                <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="n">calc_noise_threshold</span><span class="p">(</span><span class="n">spike_waves</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">spt_noise</span> <span class="o">=</span> <span class="n">extract</span><span class="o">.</span><span class="n">detect_spikes</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="s">&#39;falling&#39;</span><span class="p">)</span>
+        <span class="n">spt_noise</span> <span class="o">=</span> <span class="n">rand_sample_spt</span><span class="p">(</span><span class="n">spt_noise</span><span class="p">,</span> <span class="n">max_spikes</span><span class="p">)</span>
+        <span class="n">spt_noise</span> <span class="o">=</span> <span class="n">extract</span><span class="o">.</span><span class="n">remove_spikes</span><span class="p">(</span><span class="n">spt_noise</span><span class="p">,</span> <span class="n">spt</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">)</span>
+        <span class="n">spt_noise</span> <span class="o">=</span> <span class="n">extract</span><span class="o">.</span><span class="n">align_spikes</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">spt_noise</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">,</span> <span class="s">&#39;min&#39;</span><span class="p">,</span>
+                <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">)</span>
+
+
+    <span class="k">return</span> <span class="n">spt_noise</span>
+</div>
+<div class="viewcode-block" id="calc_noise_threshold"><a class="viewcode-back" href="../../../modules/evaluate.html#spike_sort.core.evaluate.calc_noise_threshold">[docs]</a><span class="k">def</span> <span class="nf">calc_noise_threshold</span><span class="p">(</span><span class="n">spike_waves</span><span class="p">,</span> <span class="n">sign</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">frac_spikes</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">frac_max</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Find threshold to extract noise cluster.</span>
+<span class="sd">    </span>
+<span class="sd">    According to algorithm described in Joshua et al. (2007)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spike_waves : dict</span>
+<span class="sd">        waveshapes of spikes from the identified single unit (extracted</span>
+<span class="sd">        with extract.extrac_spikes)</span>
+
+<span class="sd">    sign : int</span>
+<span class="sd">        sign should be negative for negative-going spikes and positive for</span>
+<span class="sd">        postitive-going spikes. Note that only sign of this number is taken into</span>
+<span class="sd">        account.</span>
+
+<span class="sd">    frac_spikes : float, optional</span>
+<span class="sd">        fraction of largest (smallest) spikes to calculate the threshold</span>
+<span class="sd">        from (default 0.02)</span>
+
+<span class="sd">    frac_max : float</span>
+<span class="sd">        fraction of the average peak amplitude to use as a treshold</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    threshold : float</span>
+<span class="sd">        threshold to obtain a noise cluster </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">gain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">sign</span><span class="p">)</span>
+
+    <span class="n">peak_amp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">gain</span><span class="o">*</span><span class="n">spike_waves</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">],</span><span class="mi">0</span><span class="p">)</span>     
+    <span class="n">frac_spikes</span> <span class="o">=</span> <span class="mf">0.02</span>
+    <span class="n">frac_max</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">peak_amp</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">frac_max</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">peak_amp</span><span class="p">[:</span><span class="nb">int</span><span class="p">(</span><span class="n">frac_spikes</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_amp</span><span class="p">))])</span>
+    <span class="n">threshold</span> <span class="o">*=</span> <span class="n">gain</span>
+
+    <span class="k">return</span> <span class="n">threshold</span>
+</div>
+<div class="viewcode-block" id="isolation_score"><a class="viewcode-back" href="../../../modules/evaluate.html#spike_sort.core.evaluate.isolation_score">[docs]</a><span class="k">def</span> <span class="nf">isolation_score</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">spt</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">,</span> <span class="n">spike_type</span><span class="o">=</span><span class="s">&#39;positive&#39;</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="mf">10.</span><span class="p">,</span> <span class="n">max_spikes</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="s">&quot;calculate spike isolation score from raw data and spike times&quot;</span>
+    
+    <span class="n">spike_waves</span> <span class="o">=</span> <span class="n">extract</span><span class="o">.</span><span class="n">extract_spikes</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">spt</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">)</span>
+    <span class="n">spt_noise</span> <span class="o">=</span> <span class="n">detect_noise</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">spt</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">,</span> <span class="n">spike_type</span><span class="p">)</span>
+    <span class="n">noise_waves</span> <span class="o">=</span> <span class="n">extract</span><span class="o">.</span><span class="n">extract_spikes</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">spt_noise</span><span class="p">,</span> <span class="n">sp_win</span><span class="p">)</span>
+
+    <span class="n">iso_score</span> <span class="o">=</span> <span class="n">calc_isolation_score</span><span class="p">(</span><span class="n">spike_waves</span><span class="p">,</span> <span class="n">noise_waves</span><span class="p">,</span>
+            <span class="n">spike_type</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span> <span class="n">max_spikes</span><span class="o">=</span><span class="n">max_spikes</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">iso_score</span>
+</div>
+<span class="k">def</span> <span class="nf">_iso_score_dist</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">n_spikes</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Calculate isolation score from a distance matrix</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dist : array</span>
+<span class="sd">        NxM matrix, where N is number of spikes and M is number of all</span>
+<span class="sd">        events (spikes + noise)</span>
+
+<span class="sd">    lam : float </span>
+<span class="sd">        lambda parameter</span>
+
+<span class="sd">    n_spikes : int</span>
+<span class="sd">        number of spikes (N)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    isolation_score : float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="n">distSS</span> <span class="o">=</span> <span class="n">dist</span><span class="p">[:,</span> <span class="p">:</span><span class="n">n_spikes</span><span class="p">]</span>
+    <span class="n">distSN</span> <span class="o">=</span> <span class="n">dist</span><span class="p">[:,</span> <span class="n">n_spikes</span><span class="p">:]</span> 
+
+    <span class="n">d0</span> <span class="o">=</span> <span class="n">distSS</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">expSS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">distSS</span><span class="o">*</span><span class="n">lam</span><span class="o">*</span><span class="mf">1.</span><span class="o">/</span><span class="n">d0</span><span class="p">);</span>
+    <span class="n">expSN</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">distSN</span><span class="o">*</span><span class="n">lam</span><span class="o">*</span><span class="mf">1.</span><span class="o">/</span><span class="n">d0</span><span class="p">);</span>
+ 
+    <span class="n">sumSS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">expSS</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n_spikes</span><span class="p">),</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">sumSN</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">expSN</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> 
+
+    <span class="n">correctProbS</span> <span class="o">=</span> <span class="n">sumSS</span> <span class="o">/</span>  <span class="p">(</span><span class="n">sumSS</span> <span class="o">+</span> <span class="n">sumSN</span><span class="p">)</span>
+    <span class="n">isolation_score</span> <span class="o">=</span> <span class="n">correctProbS</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">isolation_score</span>
+
+
+
+<div class="viewcode-block" id="calc_isolation_score"><a class="viewcode-back" href="../../../modules/evaluate.html#spike_sort.core.evaluate.calc_isolation_score">[docs]</a><span class="k">def</span> <span class="nf">calc_isolation_score</span><span class="p">(</span><span class="n">spike_waves</span><span class="p">,</span> <span class="n">noise_waves</span><span class="p">,</span> <span class="n">spike_type</span><span class="o">=</span><span class="s">&#39;positive&#39;</span><span class="p">,</span>
+        <span class="n">lam</span><span class="o">=</span><span class="mf">10.</span><span class="p">,</span> <span class="n">max_spikes</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate isolation index according to Joshua et al. (2007)</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spike_waves : dict</span>
+<span class="sd">    noise_waves : dict</span>
+<span class="sd">    sp_win : list or tuple</span>
+<span class="sd">        window used for spike extraction</span>
+<span class="sd">    spike_type : {&#39;positive&#39;, &#39;negative&#39;}</span>
+<span class="sd">        indicates if the spikes occuring at time points given by spt are</span>
+<span class="sd">        positive or negative going</span>
+<span class="sd">    lambda : float</span>
+<span class="sd">        determines the &quot;softness&quot; of clusters </span>
+<span class="sd">      </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    isolation_score : float</span>
+<span class="sd">        a value from the range [0,1] indicating the quality of sorting</span>
+<span class="sd">        (1=ideal isolation of spikes)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">#Memory issue: sample spikes if too many</span>
+    <span class="k">if</span> <span class="n">max_spikes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">spike_waves</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;</span><span class="n">max_spikes</span><span class="p">:</span>
+           <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">max_spikes</span><span class="p">)</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+           <span class="n">spike_waves</span> <span class="o">=</span> <span class="n">spike_waves</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+           <span class="n">spike_waves</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spike_waves</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">][:,</span> <span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">noise_waves</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;</span><span class="n">max_spikes</span><span class="p">:</span>
+           <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">max_spikes</span><span class="p">)</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+           <span class="n">noise_waves</span> <span class="o">=</span> <span class="n">noise_waves</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+           <span class="n">noise_waves</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">noise_waves</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">][:,</span> <span class="n">i</span><span class="p">]</span>
+
+
+    <span class="n">n_spikes</span> <span class="o">=</span> <span class="n">spike_waves</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    
+    <span class="c">#calculate distance between spikes and all other events</span>
+    <span class="n">all_waves</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">spike_waves</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">],</span>
+                                    <span class="n">noise_waves</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]),</span><span class="mi">1</span><span class="p">)}</span>
+    <span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">cluster</span><span class="o">.</span><span class="n">dist_euclidean</span><span class="p">(</span><span class="n">spike_waves</span><span class="p">,</span> <span class="n">all_waves</span><span class="p">)</span>
+    <span class="c">#d_0 = dist_matrix[:,:n_spikes].mean()</span>
+   
+    <span class="n">isolation_score</span> <span class="o">=</span> <span class="n">_iso_score_dist</span><span class="p">(</span><span class="n">dist_matrix</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span>
+            <span class="n">n_spikes</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">isolation_score</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"> <img src="../../../_static/logo.png"
+type="image/png" /> </img> <h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div> 
+  <div class="footer">
+    &copy; Copyright 2011, Bartosz Telenczuk, Dmytro Bielievstsov.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

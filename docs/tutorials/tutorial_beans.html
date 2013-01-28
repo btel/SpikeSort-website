@@ -1,0 +1,391 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Interactive spike sorting &mdash; SpikeSort 0.13dev documentation</title>
+    
+    <link rel="stylesheet" href="../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.13dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="SpikeSort 0.13dev documentation" href="../index.html" />
+    <link rel="up" title="Tutorials" href="index.html" />
+    <link rel="next" title="Using low-level interface" href="tutorial_manual.html" />
+    <link rel="prev" title="Tutorials" href="index.html" /> 
+  </head>
+  <body>
+  
+  
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../np-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorial_manual.html" title="Using low-level interface"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Tutorials"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">SpikeSort 0.13dev documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Tutorials</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="interactive-spike-sorting">
+<span id="beans-tutorial"></span><h1>Interactive spike sorting<a class="headerlink" href="#interactive-spike-sorting" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial shows the basic procedure of detecting, sorting, and
+exporting the spike data with the SpikeSort software. Here, we use the
+built-in component based command-line interface SpikeBeans, which is
+very easy to use.</p>
+<p>You will also find the information on how to adjust the provided
+scripts for your needs.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The procedure described in this tutorial can also be
+implemented using the SpikeSort&#8217;s methods directly (see
+<a class="reference internal" href="tutorial_manual.html#lowlevel-tutorial"><em>Using low-level interface</em></a>).</p>
+</div>
+<p>The procedure consists of three steps:</p>
+<ul class="simple">
+<li>Reading the data</li>
+<li>Spike sorting</li>
+<li>Exporting results</li>
+</ul>
+<div class="section" id="reading-the-data">
+<h2>1. Reading the data<a class="headerlink" href="#reading-the-data" title="Permalink to this headline">¶</a></h2>
+<p>Before you can start spike sorting you have to load data with raw extracellular
+recordings. Such data can be obtained from microelectrodes, tetrodes or shank
+electrodes. SpikeSort currently supports data saved in custom binary and HDF5 format
+but new formats can be easily added.</p>
+<p>To start with, you can download a sample <a class="reference external" href="http://itb.biologie.hu-berlin.de/~bartosz/spikesort/_downloads/tutorial.h5">data file</a>.</p>
+<p>This hierarchical file is organized as following:</p>
+<div class="highlight-python"><pre>/subject/session/electrodeid</pre>
+</div>
+<p>For example, data from electrode <cite>el1</cite> recorded in session <cite>session01</cite> of
+subject <cite>SubjectA</cite> can be found under <cite>/SubjectA/session01/el1</cite></p>
+<p>I will assume that you downloaded this file and saved it to <tt class="file docutils literal"><span class="pre">data</span></tt>
+directory.</p>
+<p>The fastest way prepare the data, is to use the provided script <tt class="file docutils literal"><span class="pre">cluster_beans.py</span></tt>
+which can be found in the <tt class="file docutils literal"><span class="pre">SpikeSort/examples/sorting/</span></tt> directory. By default, the script
+is configured and ready to use with the tutorial data. For now, we&#8217;ll use the unmodified version.
+However, you can find the detailed information on how to adapt the script for your needs at the end
+of this tutorial.</p>
+<p>Before you run the script, create the environment variable called DATAPATH which points to the folder
+where the data is located. On UNIX-based systems, it can be added from the terminal as follows:</p>
+<div class="highlight-python"><pre>$ export DATAPATH='where/your/data/is/located'</pre>
+</div>
+<p>Then, just fire it up from the python shell in the interactive mode:</p>
+<div class="highlight-python"><pre>$ python -i cluster_beans.py</pre>
+</div>
+<p>or, alternatively, within the <a class="reference external" href="http://ipython.org">ipython</a>  interactive shell:</p>
+<div class="highlight-python"><pre>$ ipython cluster_beans.py</pre>
+</div>
+<p>Now everything is ready to start sorting the spikes.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">IPython is an enhanced Python interpreter that provides high-level
+editting functions, such as tab-completion, call-tips, advanced command
+history and documentation access. It is the recommended way of
+working with SpikeSort.</p>
+</div>
+</div>
+<div class="section" id="spike-sorting">
+<h2>2. Spike sorting<a class="headerlink" href="#spike-sorting" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="a-visualizing-the-data">
+<h3>A. Visualizing the data<a class="headerlink" href="#a-visualizing-the-data" title="Permalink to this headline">¶</a></h3>
+<p>To provide some useful data visualization tools, the <tt class="file docutils literal"><span class="pre">cluster_beans.py</span></tt> creates four plotting objects:</p>
+<ul class="simple">
+<li><em>browser</em> - the Spike Browser</li>
+<li><em>plot1</em> - feature space viewer</li>
+<li><em>plot2</em> - spike waveshape viewer</li>
+<li><em>legend</em> - legend of the colour code used in all plots</li>
+</ul>
+<p>In order to see the output of such an object, just call its <tt class="xref py py-func docutils literal"><span class="pre">show()</span></tt> method, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">browser</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Each plotting component is described in detail below.</p>
+<div class="figure">
+<img alt="../_images/browser_nozoom.png" src="../_images/browser_nozoom.png" style="width: 100%;" />
+<p class="caption"><em>Spike Browser</em></p>
+<div class="legend">
+<p>The four horizontal black curves are the [filtered] voltage traces recorded
+from different channels (channel 0 at the bottom and 3 at the top) of the electrode
+<cite>el1</cite> (can be changed in the script). The color segments are the detected spikes&#8217;
+waveshapes. The correspondence between color and cell index can be found in the legend.</p>
+<p>Use the &#8220;+&#8221; and &#8220;-&#8221; keys to scale the vertical axis, and the &#8220;Prev&#8221; and &#8220;Next&#8221;
+buttons to navigate across the temporal axis. Now it looks more comprehensible:</p>
+</div>
+</div>
+<div class="figure">
+<a class="reference internal image-reference" href="../_images/browser_zoom.png"><img alt="../_images/browser_zoom.png" src="../_images/browser_zoom.png" /></a>
+<p class="caption"><em>Spike browser after scale adjustment.</em></p>
+</div>
+<div class="figure">
+<img alt="../_images/features.png" src="../_images/features.png" style="width: 80%;" />
+<p class="caption"><em>Feature plot</em></p>
+<div class="legend">
+<p>To sort the spikes, some characteristic features that may be used to differentiate
+between the waveshapes have been calculated (e.g. peak-to-peak amplitude,
+projections on the principal components).</p>
+<p>To help the user identify the features, all features have short labels. For example, feature <tt class="docutils literal"><span class="pre">Ch0:P2P</span></tt> denotes peak-to-peak amplitude in contact
+(channel) 0.</p>
+<p>The Feature space viewer plots the spikes&#8217; projections in the feature space
+(pair-wise 2D plots) and 1D projection histograms for each feature
+(on the diagonal). The plot is symmetric - the upper triangle is
+the same as the lower.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Depending on how many features are viewed, the subplots may be too small.
+To zoom in/out the subplot, target it with the mouse and press the &#8220;z&#8221; key.</p>
+</div>
+</div>
+</div>
+<div class="figure">
+<a class="reference internal image-reference" href="../_images/waves.png"><img alt="../_images/waves.png" src="../_images/waves.png" /></a>
+<p class="caption"><em>Spike waveshape plot</em></p>
+<div class="legend">
+<p>This component plots the aligned and overlapped spike waveshapes. The spikes
+recorded from different channels are shown in different subplots
+arranged from left to right and from top to bottom.</p>
+<p>You can also zoom the subplots here as in the Feature space viewer.</p>
+</div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p><em>Legend</em></p>
+<p>For the convenience, the legend is plotted in a separate figure.</p>
+</div>
+<div class="section" id="b-managing-the-spikes">
+<h3>B. Managing the spikes<a class="headerlink" href="#b-managing-the-spikes" title="Permalink to this headline">¶</a></h3>
+<p>The aim of the spike sorting is to differentiate one or several cells&#8217; spikes
+from  each other and from other activity (such as background noise or stimulus artifacts).
+This can be partially done by the automatic clustering in the feature space.
+However, for the reliable results, some manual manipulations are needed and the
+best settings have to be identified using trial-and-error procedure. It usually
+involves removing/merging cells (clusters), reclustering the data, and changing
+the spike detection threshold.</p>
+<p>Before we proceed, it will be convenient to create some aliases:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ca</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="s">&#39;LabelSource&#39;</span><span class="p">]</span>         <span class="c"># points to the ClusterAnalyzer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sd</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="s">&#39;SpikeMarkerSource&#39;</span><span class="p">]</span>   <span class="c"># points to the SpikeDetector</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">SpikeSort beans interface consists of independent components each
+performing one step of spike sorting. <tt class="xref py py-attr docutils literal"><span class="pre">base.features</span></tt> is a
+container with these components. The keys in this container
+(<cite>LabelSource</cite> and <cite>SpikeMarkerSource</cite>) describe the functionality that
+the components provide: <cite>LabelSource</cite> provides cluster labels and
+<cite>SpikeMarkerSource</cite> provides the times of detected spike events. In
+this example we search for the components by their functions.</p>
+</div>
+<p>Looking at the spike waveshapes, one might find, that the blue &#8220;Cell 2&#8221; (in your case, it may have
+different index and/or coloring since the clustering algorithm uses random initial state)
+is most probably not really a cell, but some noise. Thus, it is not interesting and we want
+to <strong>remove</strong> it.</p>
+<p>To remove one or more cells (i.e. clusters), you have to look up their id&#8217;s
+in the legend and then pass them as arguments to the <tt class="xref py py-func docutils literal"><span class="pre">ca.delete_cells()</span></tt> function:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ca</span><span class="o">.</span><span class="n">delete_cells</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>After we got rid of the unnesessaey stuff, the waveshape plot looks as follows:</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<blockquote>
+<div><a class="reference internal image-reference" href="../_images/waves_2_deleted.png"><img alt="../_images/waves_2_deleted.png" src="../_images/waves_2_deleted.png" /></a>
+</div></blockquote>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>All the deleted &#8220;spikes&#8221; are now assigned the id 0, which can be considered as a trash.</p>
+<p>Sometimes the clustering algorithm splits one cell into two clusters. In such cases
+it is convenient to <strong>merge</strong> them back into a single cell. In our example, there is no
+need to merge anything. However, cells 1 and 4 (blue and brown) also look like trash,
+so let&#8217;s merge them (just as a practice) and delete afterwards.</p>
+<p>The merging procedure is similar to deletion -
+<tt class="xref py py-func docutils literal"><span class="pre">ca.merge_cells()</span></tt> function takes as arguments IDs of all cells
+to be merged into one group:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ca</span><span class="o">.</span><span class="n">merge_cells</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>     <span class="c"># after merging, they form a cell with index 1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ca</span><span class="o">.</span><span class="n">delete_cells</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>      <span class="c"># removing the cell 1</span>
+</pre></div>
+</div>
+<p>Note that the new cell has an ID of one: the new cluster takes the
+lowest of the IDs of merged clusters. Now, only the cluster with real
+spikes is left (brown):</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<blockquote>
+<div><a class="reference internal image-reference" href="../_images/waves_one_left.png"><img alt="../_images/waves_one_left.png" src="../_images/waves_one_left.png" /></a>
+</div></blockquote>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>Sometimes, we need to break (<strong>recluster</strong>) the cluster into two or more (again,
+because of the incorrect clustering).</p>
+<p>To do so, use the <tt class="xref py py-func docutils literal"><span class="pre">ca.recluster()</span></tt> function:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ca</span><span class="o">.</span><span class="n">recluster</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;gmm&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where the arguments are: <cite>cell to recluster</cite>, <cite>clustering algorithm</cite>, and the <cite>number of new clusters</cite>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">There are several automatic, semi-automatic and manual methods for clustering.
+Their performance and accuracy depends to large degree on a particular dataset
+and recording setup. In SpikeSort you can choose from several available methods,
+whose names are given as the first argument of <tt class="xref py py-func docutils literal"><span class="pre">spike_sort.cluster.cluster()</span></tt>
+method. The &#8216;gmm&#8217; shortcut used in this example, means the Gaussian Mixture Model algorithm</p>
+</div>
+<p>In practice, it may happen that the <strong>threshold</strong> used during the spike detection is too
+high to detect some important activity or too low to leave the noise out. In this case
+you can easily change it (as well as any other SpikeDetector property) adjusting the
+corresponding SpikeDetector property:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sd</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="mi">90</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sd</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The <tt class="xref py py-meth docutils literal"><span class="pre">update()</span></tt> method informs all the subsequent components
+that some parameters have been changed and the analysis has to be
+repeated. When the calculations finish all the plots should be updated
+automatically.</p>
+</div>
+</div>
+<div class="section" id="exporting-the-results">
+<h2>3. Exporting the results<a class="headerlink" href="#exporting-the-results" title="Permalink to this headline">¶</a></h2>
+<p>Once you are done with the cells&#8217; differentiation, it is necessary to save the results
+somewhere. Depending on the type of the data used, the differentiated spike times
+can be stored differently. The tutorial data is in the <em>HDF5</em> format, so the
+results will be stored inside the initial <tt class="file docutils literal"><span class="pre">tutorial.h5</span></tt> file.</p>
+<p>To export the data we&#8217;ll use an instance of the <tt class="xref py py-class docutils literal"><span class="pre">ExportCells</span></tt> component
+that writes the data back to <tt class="file docutils literal"><span class="pre">tutorial.h5</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">export</span><span class="o">.</span><span class="n">export</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>If everything went fine, a new array should be created in the file at
+node <cite>/SubjectA/session01/el1/cellX</cite>, where X is the index of the
+cell.</p>
+<p>Good luck with hunting for spikes!!!</p>
+</div>
+<div class="section" id="customizing-the-script">
+<h2>Customizing the script<a class="headerlink" href="#customizing-the-script" title="Permalink to this headline">¶</a></h2>
+<p>The example script <tt class="file docutils literal"><span class="pre">spike_beans.py</span></tt> can be easily adjusted to fit your
+needs and used with the real data. Here we list the number of fields you might
+want to adjust:</p>
+<ul class="simple">
+<li><strong>hd5file</strong>           is the name of the data file (e.g. <cite>&#8216;tutorial.h5&#8217;</cite>)</li>
+<li><strong>dataset</strong>           specifies the data we are interested in (e.g. <cite>/SubjectA/session01/el1</cite>)</li>
+<li><strong>contact</strong>           sets the contact (channel) for the initial spike detection (e.g. <cite>3</cite>)</li>
+<li><strong>type</strong>                      the type of spike waveshapes&#8217; alignment (e.g. <cite>&#8216;max&#8217;</cite> - align by the peak value)</li>
+<li><strong>thresh</strong>            sets the threshold for the automatic spike detection  (e.g. <cite>70</cite>)</li>
+<li><strong>filter_freq</strong>       specifies the filter properties in the form (see scipy.signal.iirdesign documentation) <cite>(pass freq, cut-off freq[, gpass, gstop, ftype])</cite> (e.g. <cite>(800., 100., 1, 7, &#8216;butter&#8217;)</cite>)</li>
+<li><strong>sp_win</strong>            specifies the window for spike alignment (e.g. <cite>[-0.6, 0.8]</cite>)</li>
+</ul>
+<p>Additionally, you can add some features to be taken into account during clustering
+and sorting, using the <tt class="xref py py-func docutils literal"><span class="pre">add_feature()</span></tt> function of the
+<tt class="xref py py-class docutils literal"><span class="pre">FeatureExtractor</span></tt> instance. Again, it&#8217;s pretty intuitive.</p>
+<p>Adding the peak-to-peak feature:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">base</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="s">&quot;FeatureSource&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add_feature</span><span class="p">(</span><span class="s">&quot;P2P&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Adding projections on 3 Principal Components to the feature list:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">base</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="s">&quot;FeatureSource&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add_feature</span><span class="p">(</span><span class="s">&quot;PCs&quot;</span><span class="p">,</span> <span class="n">ncomps</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"> <img src="../_static/logo.png"
+type="image/png" /> </img> 
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Interactive spike sorting</a><ul>
+<li><a class="reference internal" href="#reading-the-data">1. Reading the data</a></li>
+<li><a class="reference internal" href="#spike-sorting">2. Spike sorting</a><ul>
+<li><a class="reference internal" href="#a-visualizing-the-data">A. Visualizing the data</a></li>
+<li><a class="reference internal" href="#b-managing-the-spikes">B. Managing the spikes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#exporting-the-results">3. Exporting the results</a></li>
+<li><a class="reference internal" href="#customizing-the-script">Customizing the script</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Tutorials</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Tutorials</a></li>
+      <li>Next: <a href="tutorial_manual.html" title="next chapter">Using low-level interface</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/tutorials/tutorial_beans.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div> 
+  <div class="footer">
+    &copy; Copyright 2011, Bartosz Telenczuk, Dmytro Bielievstsov.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

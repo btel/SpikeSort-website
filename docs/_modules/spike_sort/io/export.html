@@ -1,0 +1,111 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>spike_sort.io.export &mdash; SpikeSort 0.13dev documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.13dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="SpikeSort 0.13dev documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+  
+  
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../../np-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">SpikeSort 0.13dev documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for spike_sort.io.export</h1><div class="highlight"><pre>
+<div class="viewcode-block" id="export_cells"><a class="viewcode-back" href="../../../modules/io.html#spike_sort.io.export.export_cells">[docs]</a><span class="k">def</span> <span class="nf">export_cells</span><span class="p">(</span><span class="n">io_filter</span><span class="p">,</span> <span class="n">node_templ</span><span class="p">,</span> <span class="n">spike_times</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Export discriminated spike times of all cells to a file.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    io_filter : object,</span>
+<span class="sd">        read/write filter object (see :py:mod:`spike_sort.io.filters`)</span>
+<span class="sd">    node_templ : string</span>
+<span class="sd">        string identifing the dataset name. It will be passed to</span>
+<span class="sd">        IOFilters.write_spt method. It can contain the</span>
+<span class="sd">        `{cell_id}` placeholder that will be substituted by cell</span>
+<span class="sd">        identifier. </span>
+<span class="sd">    spt_dict : dict</span>
+<span class="sd">        dictionary in which keys are the cell IDs and values are spike</span>
+<span class="sd">        times structures</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">cell_id</span><span class="p">,</span> <span class="n">spt_cell</span> <span class="ow">in</span> <span class="n">spike_times</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">node_templ</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cell_id</span><span class="o">=</span><span class="n">cell_id</span><span class="p">)</span>
+        <span class="n">io_filter</span><span class="o">.</span><span class="n">write_spt</span><span class="p">(</span><span class="n">spt_cell</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"> <img src="../../../_static/logo.png"
+type="image/png" /> </img> <h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div> 
+  <div class="footer">
+    &copy; Copyright 2011, Bartosz Telenczuk, Dmytro Bielievstsov.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

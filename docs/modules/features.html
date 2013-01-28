@@ -1,0 +1,522 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Calculate features (spike_sort.features) &mdash; SpikeSort 0.13dev documentation</title>
+    
+    <link rel="stylesheet" href="../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.13dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="SpikeSort 0.13dev documentation" href="../index.html" />
+    <link rel="next" title="Cluster (spike_sort.cluster)" href="cluster.html" />
+    <link rel="prev" title="Extract (spike_sort.core.extract)" href="extract.html" /> 
+  </head>
+  <body>
+  
+  
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../np-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cluster.html" title="Cluster (spike_sort.cluster)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="extract.html" title="Extract (spike_sort.core.extract)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">SpikeSort 0.13dev documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="calculate-features-spike-sort-features">
+<h1>Calculate features (<tt class="xref py py-mod docutils literal"><span class="pre">spike_sort.features</span></tt>)<a class="headerlink" href="#calculate-features-spike-sort-features" title="Permalink to this headline">¶</a></h1>
+<p>Provides functions to calculate spike waveforms features.</p>
+<div class="section" id="features">
+<span id="features-doc"></span><h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<p>Functions starting with <cite>fet</cite> implement various features calculated
+from the spike waveshapes. They have usually one required argument
+<a class="reference internal" href="../datastructures.html#spike-wave"><em>Spike waveforms</em></a> structure and some can have optional arguments (see
+below)</p>
+<p>Each of the function returns a mapping structure (dictionary) with the following keys:</p>
+<blockquote>
+<div><ul class="simple">
+<li><cite>data</cite> &#8211; an array of shape (n_spikes x n_features)</li>
+<li><cite>names</cite> &#8211; a list of length n_features with feature labels</li>
+</ul>
+</div></blockquote>
+<p>The following features are implemented:</p>
+<blockquote>
+<div><table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.core.features.fetPCs" title="spike_sort.core.features.fetPCs"><tt class="xref py py-obj docutils literal"><span class="pre">fetPCs</span></tt></a>(spike_data,&nbsp;*args,&nbsp;**kwargs)</td>
+<td>Calculate principal components (PCs).</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#spike_sort.core.features.fetP2P" title="spike_sort.core.features.fetP2P"><tt class="xref py py-obj docutils literal"><span class="pre">fetP2P</span></tt></a>(spike_data,&nbsp;*args,&nbsp;**kwargs)</td>
+<td>Calculate peak-to-peak amplitudes of spike waveforms.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.core.features.fetSpIdx" title="spike_sort.core.features.fetSpIdx"><tt class="xref py py-obj docutils literal"><span class="pre">fetSpIdx</span></tt></a>(spike_data,&nbsp;*args,&nbsp;**kwargs)</td>
+<td>Spike sequential index (0,1,2, ...)</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#spike_sort.core.features.fetSpTime" title="spike_sort.core.features.fetSpTime"><tt class="xref py py-obj docutils literal"><span class="pre">fetSpTime</span></tt></a>(spike_data,&nbsp;*args,&nbsp;**kwargs)</td>
+<td>Spike occurrence time in milliseconds.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.core.features.fetSpProjection" title="spike_sort.core.features.fetSpProjection"><tt class="xref py py-obj docutils literal"><span class="pre">fetSpProjection</span></tt></a>(spike_data,&nbsp;*args,&nbsp;**kwargs)</td>
+<td>Projection coefficient of spikes on an averaged waveform</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</div>
+<div class="section" id="tools">
+<h2>Tools<a class="headerlink" href="#tools" title="Permalink to this headline">¶</a></h2>
+<p>This module provides a few tools to facilitate working with features
+data structure:</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.core.features.split_cells" title="spike_sort.core.features.split_cells"><tt class="xref py py-obj docutils literal"><span class="pre">split_cells</span></tt></a>(features,&nbsp;idx[,&nbsp;which])</td>
+<td>return the spike features splitted into separate cells</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#spike_sort.core.features.select" title="spike_sort.core.features.select"><tt class="xref py py-obj docutils literal"><span class="pre">select</span></tt></a>(features_dict,&nbsp;features_ids)</td>
+<td>Choose selected features from the collection</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.core.features.combine" title="spike_sort.core.features.combine"><tt class="xref py py-obj docutils literal"><span class="pre">combine</span></tt></a>(args[,&nbsp;norm])</td>
+<td>Combine features into a single structure</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#spike_sort.core.features.normalize" title="spike_sort.core.features.normalize"><tt class="xref py py-obj docutils literal"><span class="pre">normalize</span></tt></a>(features[,&nbsp;copy])</td>
+<td>Normalize features</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="auxiliary">
+<h2>Auxiliary<a class="headerlink" href="#auxiliary" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.core.features.PCA" title="spike_sort.core.features.PCA"><tt class="xref py py-obj docutils literal"><span class="pre">PCA</span></tt></a>(data[,&nbsp;ncomps])</td>
+<td>Perfrom a principle component analysis.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#spike_sort.core.features.add_mask" title="spike_sort.core.features.add_mask"><tt class="xref py py-obj docutils literal"><span class="pre">add_mask</span></tt></a>(feature_function)</td>
+<td>Decorator to copy mask from waveshapes to features</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-spike_sort.core.features">
+<span id="reference"></span><h2>Reference<a class="headerlink" href="#module-spike_sort.core.features" title="Permalink to this headline">¶</a></h2>
+<p>Provides functions to calculate spike waveforms features.</p>
+<p>Functions starting with <cite>fet</cite> implement various features calculated
+from the spike waveshapes. They have usually one required argument
+<a class="reference internal" href="../datastructures.html#spike-wave"><em>Spike waveforms</em></a> structure (but there are exceptions!).</p>
+<p>Each of the function returns a (mapping) object with following keys:</p>
+<blockquote>
+<div><ul class="simple">
+<li>data &#8211; an array of shape (n_spikes, n_features)</li>
+<li>names &#8211; a list of length n_features with feature labels</li>
+</ul>
+</div></blockquote>
+<dl class="function">
+<dt id="spike_sort.core.features.PCA">
+<tt class="descclassname">spike_sort.core.features.</tt><tt class="descname">PCA</tt><big>(</big><em>data</em>, <em>ncomps=2</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/features.html#PCA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.features.PCA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perfrom a principle component analysis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>data</strong> : array</p>
+<blockquote>
+<div><p>(n_vars, n_obs) array where <cite>n_vars</cite> is the number of
+variables (vector dimensions) and <cite>n_obs</cite> the number of
+observations</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first"><strong>evals</strong> : array</p>
+<blockquote>
+<div><p>sorted eigenvalues</p>
+</div></blockquote>
+<p><strong>evecs</strong> : array</p>
+<blockquote>
+<div><p>sorted eigenvectors</p>
+</div></blockquote>
+<p><strong>score</strong> : array</p>
+<blockquote class="last">
+<div><p>projection of the data on <cite>ncomps</cite> components</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.features.WT">
+<tt class="descclassname">spike_sort.core.features.</tt><tt class="descname">WT</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/features.html#WT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.features.WT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perfroms a batch 1D wavelet transform.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>data</strong> : array</p>
+<blockquote>
+<div><p>(n_vars, n_obs, n_contacts) array where <cite>n_vars</cite> is the number of
+variables (vector dimensions), <cite>n_obs</cite> the number of observations
+and <cite>n_contacts</cite> is the number of contacts. Only 3D arrays are
+accepted.</p>
+</div></blockquote>
+<p><strong>wavelet</strong> : string or pywt.Wavelet</p>
+<blockquote>
+<div><p>wavelet to be used to perform the transform</p>
+</div></blockquote>
+<p><strong>mode</strong> : string, optional</p>
+<blockquote>
+<div><p>signal extension mode (see modes in PyWavelets documentation)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first"><strong>data</strong> : array</p>
+<blockquote class="last">
+<div><p>(n_coeffs, n_obs, n_contacts) 1D wavelet transform of each vector
+of the input data array. <cite>pywt.wavedec</cite> is used to perform the
+transform. For every vector of the input array, a 1D transformation
+is returned of the form [cA_n, cD_n, cD_n-1, ..., cD_n2, cD_n1]
+where cA_n and cD_n are approximation and detailed coefficients of
+level n. cA_n and cD_n&#8217;s are stacked together in a single vector.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>PyWavelets documentation contains more detailed information on the
+wavelet transform.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.features.add_mask">
+<tt class="descclassname">spike_sort.core.features.</tt><tt class="descname">add_mask</tt><big>(</big><em>feature_function</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/features.html#add_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.features.add_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator to copy mask from waveshapes to features</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.features.combine">
+<tt class="descclassname">spike_sort.core.features.</tt><tt class="descname">combine</tt><big>(</big><em>args</em>, <em>norm=True</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/features.html#combine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.features.combine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine features into a single structure</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>args</strong> : tuple or list of dict</p>
+<blockquote>
+<div><p>a tuple of feature data structures</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first last"><strong>combined_fetures</strong> : dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.features.fetP2P">
+<tt class="descclassname">spike_sort.core.features.</tt><tt class="descname">fetP2P</tt><big>(</big><em>spike_data</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/features.html#fetP2P"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.features.fetP2P" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate peak-to-peak amplitudes of spike waveforms.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><strong>spikes</strong> : dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><strong>features</strong> : dict</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>We will generate a spikewave structure containing only a single
+spike on a single channel</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">spike_sort</span> <span class="kn">import</span> <span class="n">features</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span><span class="mf">0.01</span><span class="p">)</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spikes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">time</span><span class="p">)[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spikewave</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;data&quot;</span><span class="p">:</span> <span class="n">spikes</span><span class="p">,</span> <span class="s">&quot;time&quot;</span><span class="p">:</span><span class="n">time</span><span class="p">,</span> <span class="s">&quot;contacts&quot;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;FS&quot;</span><span class="p">:</span><span class="mi">1</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p2p</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">fetP2P</span><span class="p">(</span><span class="n">spikewave</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">p2p</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+<span class="go">[[ 1.99999683]]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.features.fetPCs">
+<tt class="descclassname">spike_sort.core.features.</tt><tt class="descname">fetPCs</tt><big>(</big><em>spike_data</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/features.html#fetPCs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.features.fetPCs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate principal components (PCs).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>spikes</strong> : dict</p>
+<p><strong>ncomps</strong> : int, optional</p>
+<blockquote>
+<div><p>number of components to retain</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first last"><strong>features</strong> : dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.features.fetSpIdx">
+<tt class="descclassname">spike_sort.core.features.</tt><tt class="descname">fetSpIdx</tt><big>(</big><em>spike_data</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/features.html#fetSpIdx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.features.fetSpIdx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spike sequential index (0,1,2, ...)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.features.fetSpProjection">
+<tt class="descclassname">spike_sort.core.features.</tt><tt class="descname">fetSpProjection</tt><big>(</big><em>spike_data</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/features.html#fetSpProjection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.features.fetSpProjection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Projection coefficient of spikes on an averaged waveform</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>spikes_data</strong> : dict</p>
+<blockquote>
+<div><p>waveform data</p>
+</div></blockquote>
+<p><strong>labels</strong> : array</p>
+<blockquote>
+<div><p>array of length equal to number of spikes that contains 
+cluster labels</p>
+</div></blockquote>
+<p><strong>cell_id</strong> : int</p>
+<blockquote class="last">
+<div><p>label of cell on which all spikes should be projected.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p><cite>labels</cite> can be also a boolean array in which case only spikes for 
+which label is True value will be averaged to determine projection
+coefficient</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.features.fetSpTime">
+<tt class="descclassname">spike_sort.core.features.</tt><tt class="descname">fetSpTime</tt><big>(</big><em>spike_data</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/features.html#fetSpTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.features.fetSpTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spike occurrence time in milliseconds.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.features.fetWTs">
+<tt class="descclassname">spike_sort.core.features.</tt><tt class="descname">fetWTs</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/features.html#fetWTs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.features.fetWTs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate wavelet transform reduce the dimensionality</p>
+<p>The dimensionality reduction is done by picking the most &#8220;interesting&#8221;
+wavelet coefficients or their linear combibations, depending on the
+<cite>select_method</cite> value</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>spikes_data</strong> : dict</p>
+<p><strong>nfeatures</strong> : int, optional</p>
+<blockquote>
+<div><p>number of wavelet coefficients to return</p>
+</div></blockquote>
+<p><strong>contacts</strong> : string or int or list, optional</p>
+<blockquote>
+<div><p>contacts to be processed</p>
+</div></blockquote>
+<p><strong>wavelet</strong> : string or pywt.Wavelet, optional</p>
+<blockquote>
+<div><p>wavelet to be used for transformation</p>
+</div></blockquote>
+<p><strong>mode</strong> : string, optional</p>
+<blockquote>
+<div><p>signal extension mode (see modes in PyWavelets documentation)</p>
+</div></blockquote>
+<p><strong>select_method</strong> : string, optional</p>
+<blockquote>
+<div><p>method to select the &#8220;interesting&#8221; coefficients. Following
+statistics are supported:
+&#8216;std&#8217;</p>
+<blockquote>
+<div><p>standard deviation</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>&#8216;std_r&#8217;</dt>
+<dd><p class="first last">robust estimate of std (Quiroga et al, 2004)</p>
+</dd>
+<dt>&#8216;ks&#8217;</dt>
+<dd><p class="first last">Kolmogorov-Smirnov test for normality (useful for selecting
+coeffs with multimodal distributions)</p>
+</dd>
+<dt>&#8216;dip&#8217;</dt>
+<dd><p class="first last">DIP statistic (tests unimodality) by Hartigan &amp; Hartigan 1985.
+Also useful for picking coeffs with multimodal distributions.</p>
+</dd>
+<dt>&#8216;ksPCA&#8217; and &#8216;dipPCA&#8217;</dt>
+<dd><p class="first last">implementation of modality-weighted PCA (Takekawa et al, 2012)
+using &#8216;ks&#8217; and &#8216;dip&#8217; tests respectively</p>
+</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first last"><strong>features</strong> : dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.features.normalize">
+<tt class="descclassname">spike_sort.core.features.</tt><tt class="descname">normalize</tt><big>(</big><em>features</em>, <em>copy=True</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/features.html#normalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.features.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize features</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.features.select">
+<tt class="descclassname">spike_sort.core.features.</tt><tt class="descname">select</tt><big>(</big><em>features_dict</em>, <em>features_ids</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/features.html#select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.features.select" title="Permalink to this definition">¶</a></dt>
+<dd><p>Choose selected features from the collection</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.features.select_spikes">
+<tt class="descclassname">spike_sort.core.features.</tt><tt class="descname">select_spikes</tt><big>(</big><em>features</em>, <em>idx</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/features.html#select_spikes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.features.select_spikes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Truncate features array to selected spikes. This method should be
+used to properly truncate the &#8220;features&#8221; structure</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>features</strong> : features structure</p>
+<blockquote>
+<div><p>features structure to truncate</p>
+</div></blockquote>
+<p><strong>idx</strong> : bool list or int list</p>
+<blockquote>
+<div><p>indices of selected spikes</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first"><strong>new_feats</strong> : features structure</p>
+<blockquote class="last">
+<div><p>new features structure containing only data for selected spike
+indices</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.features.split_cells">
+<tt class="descclassname">spike_sort.core.features.</tt><tt class="descname">split_cells</tt><big>(</big><em>features</em>, <em>idx</em>, <em>which='all'</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/features.html#split_cells"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.features.split_cells" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the spike features splitted into separate cells</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"> <img src="../_static/logo.png"
+type="image/png" /> </img> 
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Calculate features (<tt class="docutils literal"><span class="pre">spike_sort.features</span></tt>)</a><ul>
+<li><a class="reference internal" href="#features">Features</a></li>
+<li><a class="reference internal" href="#tools">Tools</a></li>
+<li><a class="reference internal" href="#auxiliary">Auxiliary</a></li>
+<li><a class="reference internal" href="#module-spike_sort.core.features">Reference</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="extract.html" title="previous chapter">Extract (<tt class="docutils literal docutils literal docutils literal"><span class="pre">spike_sort.core.extract</span></tt>)</a></li>
+      <li>Next: <a href="cluster.html" title="next chapter">Cluster (<tt class="docutils literal docutils literal docutils literal"><span class="pre">spike_sort.cluster</span></tt>)</a></li>
+  </ul></li>
+</ul>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/modules/features.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div> 
+  <div class="footer">
+    &copy; Copyright 2011, Bartosz Telenczuk, Dmytro Bielievstsov.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

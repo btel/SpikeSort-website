@@ -1,0 +1,284 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>spike_sort.ui.plotting &mdash; SpikeSort 0.13dev documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.13dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="SpikeSort 0.13dev documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+  
+  
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../../np-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">SpikeSort 0.13dev documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for spike_sort.ui.plotting</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c">#coding=utf-8</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">matplotlib.collections</span> <span class="kn">import</span> <span class="n">LineCollection</span>
+
+<span class="c"># used by other modules which import plotting.py. Do not remove!</span>
+<span class="kn">from</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">import</span> <span class="n">show</span><span class="p">,</span> <span class="n">figure</span><span class="p">,</span> <span class="n">close</span>
+
+<span class="kn">import</span> <span class="nn">spike_sort</span>
+<span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">jet</span>
+
+<div class="viewcode-block" id="label_color"><a class="viewcode-back" href="../../../modules/ui.html#spike_sort.ui.plotting.label_color">[docs]</a><span class="k">def</span> <span class="nf">label_color</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Map labels to number range [0, 1]&quot;&quot;&quot;</span>
+    
+    <span class="n">num_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span>
+    <span class="n">mapper</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">num_labels</span><span class="p">))</span>
+    
+    <span class="nd">@np.vectorize</span>
+    <span class="k">def</span> <span class="nf">map_func</span><span class="p">(</span><span class="n">lab</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">mapper</span><span class="p">[</span><span class="n">lab</span><span class="p">]</span>
+    
+    <span class="k">def</span> <span class="nf">color_func</span><span class="p">(</span><span class="n">lab</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cmap</span><span class="p">(</span><span class="n">map_func</span><span class="p">(</span><span class="n">lab</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">color_func</span>
+</div>
+<div class="viewcode-block" id="plot_spikes"><a class="viewcode-back" href="../../../modules/ui.html#spike_sort.ui.plotting.plot_spikes">[docs]</a><span class="k">def</span> <span class="nf">plot_spikes</span><span class="p">(</span><span class="n">spikes</span><span class="p">,</span> <span class="n">clust_idx</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">show_cells</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot Spike waveshapes</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spike_data : dict</span>
+<span class="sd">    clust_idx : sequence</span>
+<span class="sd">        sequence of the length equal to the number of spikes; labels of</span>
+<span class="sd">        clusters to which spikes belong</span>
+<span class="sd">    show_cells : list or &#39;all&#39;</span>
+<span class="sd">        list of identifiers of clusters (cells) to plot</span>
+<span class="sd">    plot_avg: bool</span>
+<span class="sd">        if True plot waveform averages</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    lines_segments : object</span>
+<span class="sd">        matplotlib line collection of spike waveshapes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="n">clust_idx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">spikegraph</span><span class="p">(</span><span class="n">spikes</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">spikes_cell</span> <span class="o">=</span> <span class="n">spike_sort</span><span class="o">.</span><span class="n">extract</span><span class="o">.</span><span class="n">split_cells</span><span class="p">(</span><span class="n">spikes</span><span class="p">,</span> <span class="n">clust_idx</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">show_cells</span> <span class="o">==</span> <span class="s">&#39;all&#39;</span><span class="p">:</span>
+            <span class="n">labs</span> <span class="o">=</span> <span class="n">spikes_cell</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">labs</span> <span class="o">=</span> <span class="n">show_cells</span>
+       
+        <span class="n">color_func</span> <span class="o">=</span> <span class="n">label_color</span><span class="p">(</span><span class="n">spikes_cell</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">labs</span><span class="p">:</span>
+            <span class="n">spikegraph</span><span class="p">(</span><span class="n">spikes_cell</span><span class="p">[</span><span class="n">l</span><span class="p">],</span> <span class="n">color_func</span><span class="p">(</span><span class="n">l</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="spikegraph"><a class="viewcode-back" href="../../../modules/ui.html#spike_sort.ui.plotting.spikegraph">[docs]</a><span class="k">def</span> <span class="nf">spikegraph</span><span class="p">(</span><span class="n">spike_data</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">n_spikes</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">,</span> <span class="n">contacts</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">,</span> 
+                <span class="n">plot_avg</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+
+    <span class="n">spikes</span> <span class="o">=</span>  <span class="n">spike_data</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">spike_data</span><span class="p">[</span><span class="s">&#39;time&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">contacts</span> <span class="o">==</span> <span class="s">&#39;all&#39;</span><span class="p">:</span>
+        <span class="n">contacts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">spikes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    
+    <span class="n">n_pts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+    
+    <span class="k">if</span>  <span class="ow">not</span> <span class="n">n_spikes</span><span class="o">==</span><span class="s">&#39;all&#39;</span><span class="p">:</span>
+        <span class="n">spikes</span> <span class="o">=</span> <span class="n">spikes</span><span class="p">[:,:</span><span class="n">n_spikes</span><span class="p">,:]</span>
+    <span class="n">n_spikes</span> <span class="o">=</span> <span class="n">spikes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span>
+    <span class="n">line_segments</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">contact_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">contacts</span><span class="p">):</span> 
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c">#ax.set_xlim(time.min(), time.max())</span>
+        <span class="c">#ax.set_ylim(spikes.min(), spikes.max())</span>
+        
+        
+        <span class="n">segs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_spikes</span><span class="p">,</span> <span class="n">n_pts</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">segs</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,:]</span>
+        <span class="n">segs</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">spikes</span><span class="p">[:,:,</span> <span class="n">contact_id</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">collection</span> <span class="o">=</span> <span class="n">LineCollection</span><span class="p">(</span><span class="n">segs</span><span class="p">,</span><span class="n">colors</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                                            <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="n">line_segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">add_collection</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">autolim</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">plot_avg</span><span class="p">:</span>
+            <span class="n">spikes_mean</span> <span class="o">=</span> <span class="n">spikes</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> 
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">spikes_mean</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;w&#39;</span><span class="p">,</span><span class="n">lw</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">spikes_mean</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">autoscale_view</span><span class="p">(</span><span class="n">tight</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            
+    <span class="k">return</span> <span class="n">line_segments</span>
+</div>
+<div class="viewcode-block" id="plot_features"><a class="viewcode-back" href="../../../modules/ui.html#spike_sort.ui.plotting.plot_features">[docs]</a><span class="k">def</span> <span class="nf">plot_features</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">clust_idx</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">show_cells</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot features and their histograms</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    features_dict : dict</span>
+<span class="sd">        features data structure</span>
+<span class="sd">    clust_idx : array or None</span>
+<span class="sd">        array of size (n_spikes,) containing indices of clusters to which</span>
+<span class="sd">        each spike was classfied</span>
+<span class="sd">    show_cells : list or &#39;all&#39;</span>
+<span class="sd">        list of identifiers of clusters (cells) to plot</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">clust_idx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">featuresgraph</span><span class="p">(</span><span class="n">features</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">features_cell</span> <span class="o">=</span> <span class="n">spike_sort</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">split_cells</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">clust_idx</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">show_cells</span> <span class="o">==</span> <span class="s">&#39;all&#39;</span><span class="p">:</span>
+            <span class="n">labs</span> <span class="o">=</span> <span class="n">features_cell</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">labs</span> <span class="o">=</span> <span class="n">show_cells</span>
+       
+        <span class="n">color_func</span> <span class="o">=</span> <span class="n">label_color</span><span class="p">(</span><span class="n">features_cell</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">labs</span><span class="p">:</span>
+            <span class="n">featuresgraph</span><span class="p">(</span><span class="n">features_cell</span><span class="p">[</span><span class="n">l</span><span class="p">],</span> <span class="n">color_func</span><span class="p">(</span><span class="n">l</span><span class="p">),</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="featuresgraph"><a class="viewcode-back" href="../../../modules/ui.html#spike_sort.ui.plotting.featuresgraph">[docs]</a><span class="k">def</span> <span class="nf">featuresgraph</span><span class="p">(</span><span class="n">features_dict</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">datarange</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="n">features</span> <span class="o">=</span> <span class="n">features_dict</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">features_dict</span><span class="p">[</span><span class="s">&#39;names&#39;</span><span class="p">]</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">n_feats</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span>
+    <span class="n">axes</span> <span class="o">=</span> <span class="p">[[</span><span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">n_feats</span><span class="p">,</span> <span class="n">n_feats</span><span class="p">,</span> <span class="n">i</span><span class="o">*</span><span class="n">n_feats</span> <span class="o">+</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> 
+             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_feats</span><span class="p">)]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_feats</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_feats</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_feats</span><span class="p">):</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">i</span><span class="o">!=</span><span class="n">j</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">features</span><span class="p">[:,</span><span class="n">i</span><span class="p">],</span>
+                         <span class="n">features</span><span class="p">[:,</span><span class="n">j</span><span class="p">],</span><span class="s">&quot;.&quot;</span><span class="p">,</span> 
+                        <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">datarange</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">datarange</span><span class="p">)</span>
+                    
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_frame_on</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+           
+                <span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">features</span><span class="p">[:,</span><span class="n">i</span><span class="p">],</span><span class="mi">20</span><span class="p">,</span> 
+                        <span class="n">datarange</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s">&quot;none&quot;</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">normed</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">datarange</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">datarange</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">names</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_label_position</span><span class="p">(</span><span class="s">&quot;top&quot;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_feats</span><span class="p">):</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> 
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="legend"><a class="viewcode-back" href="../../../modules/ui.html#spike_sort.ui.plotting.legend">[docs]</a><span class="k">def</span> <span class="nf">legend</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">colors</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">color_func</span> <span class="o">=</span> <span class="n">label_color</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">color_func</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">]</span>
+        
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_frame_on</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">n_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_classes</span><span class="p">)</span><span class="o">+</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_classes</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s">&#39;s&#39;</span><span class="p">,</span><span class="n">edgecolors</span><span class="o">=</span><span class="s">&quot;none&quot;</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s">&quot;Cell {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">l</span><span class="p">),</span> <span class="n">va</span><span class="o">=</span><span class="s">&#39;center&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s">&#39;left&#39;</span><span class="p">,</span>
+                 <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transData</span><span class="p">)</span>
+    
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"> <img src="../../../_static/logo.png"
+type="image/png" /> </img> <h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div> 
+  <div class="footer">
+    &copy; Copyright 2011, Bartosz Telenczuk, Dmytro Bielievstsov.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

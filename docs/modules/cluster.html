@@ -1,0 +1,315 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Cluster (spike_sort.cluster) &mdash; SpikeSort 0.13dev documentation</title>
+    
+    <link rel="stylesheet" href="../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.13dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="SpikeSort 0.13dev documentation" href="../index.html" />
+    <link rel="next" title="Evaluate (spike_sort.evaluate)" href="evaluate.html" />
+    <link rel="prev" title="Calculate features (spike_sort.features)" href="features.html" /> 
+  </head>
+  <body>
+  
+  
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../np-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="evaluate.html" title="Evaluate (spike_sort.evaluate)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="features.html" title="Calculate features (spike_sort.features)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">SpikeSort 0.13dev documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="cluster-spike-sort-cluster">
+<h1>Cluster (<tt class="xref py py-mod docutils literal"><span class="pre">spike_sort.cluster</span></tt>)<a class="headerlink" href="#cluster-spike-sort-cluster" title="Permalink to this headline">¶</a></h1>
+<p>Module with clustering algorithms.</p>
+<div class="section" id="utility-functions">
+<h2>Utility functions<a class="headerlink" href="#utility-functions" title="Permalink to this headline">¶</a></h2>
+<p>Spike sorting is usually done with the
+<a class="reference internal" href="#spike_sort.core.cluster.cluster" title="spike_sort.core.cluster.cluster"><tt class="xref py py-func docutils literal"><span class="pre">cluster()</span></tt></a> function which takes as an
+argument one of the clustering methods (as a string).</p>
+<p>Others functions help to manipulate the results:</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.core.cluster.cluster" title="spike_sort.core.cluster.cluster"><tt class="xref py py-obj docutils literal"><span class="pre">cluster</span></tt></a>(method,&nbsp;features,&nbsp;*args,&nbsp;**kwargs)</td>
+<td>Automatically cluster spikes using K means algorithm</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#spike_sort.core.cluster.split_cells" title="spike_sort.core.cluster.split_cells"><tt class="xref py py-obj docutils literal"><span class="pre">split_cells</span></tt></a>(spt_dict,&nbsp;idx[,&nbsp;which])</td>
+<td>return the spike times belonging to the cluster and the rest</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="clustering-methods">
+<h2>Clustering methods<a class="headerlink" href="#clustering-methods" title="Permalink to this headline">¶</a></h2>
+<p>Several different clustering methods are defined in the module. Each
+method should take at least one argument &#8211; the features structure.</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.core.cluster.k_means_plus" title="spike_sort.core.cluster.k_means_plus"><tt class="xref py py-obj docutils literal"><span class="pre">k_means_plus</span></tt></a>(*args,&nbsp;**kwargs)</td>
+<td>k means with smart initialization.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#spike_sort.core.cluster.gmm" title="spike_sort.core.cluster.gmm"><tt class="xref py py-obj docutils literal"><span class="pre">gmm</span></tt></a>(data,&nbsp;k)</td>
+<td>Cluster based on gaussian mixture models</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.core.cluster.manual" title="spike_sort.core.cluster.manual"><tt class="xref py py-obj docutils literal"><span class="pre">manual</span></tt></a>(data,&nbsp;*args,&nbsp;**kwargs)</td>
+<td>Sort spikes manually by cluster cutting</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#spike_sort.core.cluster.none" title="spike_sort.core.cluster.none"><tt class="xref py py-obj docutils literal"><span class="pre">none</span></tt></a>(data)</td>
+<td>Do nothing</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.core.cluster.k_means" title="spike_sort.core.cluster.k_means"><tt class="xref py py-obj docutils literal"><span class="pre">k_means</span></tt></a>(features,&nbsp;K)</td>
+<td>Perform K means clustering</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-spike_sort.core.cluster">
+<span id="reference"></span><h2>Reference<a class="headerlink" href="#module-spike_sort.core.cluster" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="spike_sort.core.cluster.cluster">
+<tt class="descclassname">spike_sort.core.cluster.</tt><tt class="descname">cluster</tt><big>(</big><em>method</em>, <em>features</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/cluster.html#cluster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.cluster.cluster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatically cluster spikes using K means algorithm</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>features</strong> : dict</p>
+<blockquote>
+<div><p>spike features datastructure</p>
+</div></blockquote>
+<p><strong>n_clusters</strong> : int</p>
+<blockquote>
+<div><p>number of clusters to identify</p>
+</div></blockquote>
+<p><strong>args, kwargs :</strong> :</p>
+<blockquote>
+<div><p>optional arguments that are passed to the clustering algorithm</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first"><strong>labels</strong> : array</p>
+<blockquote class="last">
+<div><p>array of cluster (unit) label - one for each cell</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>Create a sample feature dataset and use k-means clustering to find
+groups of spikes (units)</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">spike_sort</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1234</span><span class="p">)</span> <span class="c">#k_means uses random initialization</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">features</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;data&#39;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">],</span>
+<span class="gp">... </span>                             <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+<span class="gp">... </span>                             <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">],</span>
+<span class="gp">... </span>                             <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="mi">0</span><span class="p">]])}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">labels</span> <span class="o">=</span> <span class="n">spike_sort</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">cluster</span><span class="p">(</span><span class="s">&#39;k_means&#39;</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">labels</span>
+<span class="go">[0 1 1 0]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.cluster.dist_euclidean">
+<tt class="descclassname">spike_sort.core.cluster.</tt><tt class="descname">dist_euclidean</tt><big>(</big><em>spike_waves1</em>, <em>spike_waves2=None</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/cluster.html#dist_euclidean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.cluster.dist_euclidean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given spike_waves calculate pairwise Euclidean distance between
+them</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.cluster.gmm">
+<tt class="descclassname">spike_sort.core.cluster.</tt><tt class="descname">gmm</tt><big>(</big><em>data</em>, <em>k</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/cluster.html#gmm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.cluster.gmm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cluster based on gaussian mixture models</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>data</strong> : dict</p>
+<blockquote>
+<div><p>features structure</p>
+</div></blockquote>
+<p><strong>k</strong> :  int</p>
+<blockquote>
+<div><p>number of clusters</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first"><strong>cl</strong> : int array</p>
+<blockquote class="last">
+<div><p>cluster indicies</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This function requires scikits-learn</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.cluster.k_means">
+<tt class="descclassname">spike_sort.core.cluster.</tt><tt class="descname">k_means</tt><big>(</big><em>features</em>, <em>K</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/cluster.html#k_means"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.cluster.k_means" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform K means clustering</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>data</strong> : dict</p>
+<blockquote>
+<div><p>data vectors (n,m) where n is the number of datapoints and m is
+the number of variables</p>
+</div></blockquote>
+<p><strong>K</strong> : int</p>
+<blockquote>
+<div><p>number of distinct clusters to identify</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first"><strong>partition</strong> : array</p>
+<blockquote class="last">
+<div><p>vector of cluster labels (ints) for each datapoint from <cite>data</cite></p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.cluster.k_means_plus">
+<tt class="descclassname">spike_sort.core.cluster.</tt><tt class="descname">k_means_plus</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/cluster.html#k_means_plus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.cluster.k_means_plus" title="Permalink to this definition">¶</a></dt>
+<dd><p>k means with smart initialization.</p>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><tt class="xref py py-obj docutils literal"><span class="pre">kmeans</span></tt></p>
+</div>
+<p class="rubric">Notes</p>
+<p>This function requires scikits-learn</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.cluster.manual">
+<tt class="descclassname">spike_sort.core.cluster.</tt><tt class="descname">manual</tt><big>(</big><em>data</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/cluster.html#manual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.cluster.manual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sort spikes manually by cluster cutting</p>
+<p>Opens a new window in which you can draw cluster of arbitrary
+shape.</p>
+<p class="rubric">Notes</p>
+<p>Only two first features are plotted</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.cluster.none">
+<tt class="descclassname">spike_sort.core.cluster.</tt><tt class="descname">none</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/cluster.html#none"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.cluster.none" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do nothing</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.cluster.split_cells">
+<tt class="descclassname">spike_sort.core.cluster.</tt><tt class="descname">split_cells</tt><big>(</big><em>spt_dict</em>, <em>idx</em>, <em>which='all'</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/cluster.html#split_cells"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.cluster.split_cells" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the spike times belonging to the cluster and the rest</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"> <img src="../_static/logo.png"
+type="image/png" /> </img> 
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Cluster (<tt class="docutils literal"><span class="pre">spike_sort.cluster</span></tt>)</a><ul>
+<li><a class="reference internal" href="#utility-functions">Utility functions</a></li>
+<li><a class="reference internal" href="#clustering-methods">Clustering methods</a></li>
+<li><a class="reference internal" href="#module-spike_sort.core.cluster">Reference</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="features.html" title="previous chapter">Calculate features (<tt class="docutils literal"><span class="pre">spike_sort.features</span></tt>)</a></li>
+      <li>Next: <a href="evaluate.html" title="next chapter">Evaluate (<tt class="docutils literal"><span class="pre">spike_sort.evaluate</span></tt>)</a></li>
+  </ul></li>
+</ul>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/modules/cluster.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div> 
+  <div class="footer">
+    &copy; Copyright 2011, Bartosz Telenczuk, Dmytro Bielievstsov.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

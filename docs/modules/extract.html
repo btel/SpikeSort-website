@@ -1,0 +1,343 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Extract (spike_sort.core.extract) &mdash; SpikeSort 0.13dev documentation</title>
+    
+    <link rel="stylesheet" href="../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.13dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="SpikeSort 0.13dev documentation" href="../index.html" />
+    <link rel="next" title="Calculate features (spike_sort.features)" href="features.html" />
+    <link rel="prev" title="Sample data files" href="../datafiles.html" /> 
+  </head>
+  <body>
+  
+  
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../np-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="features.html" title="Calculate features (spike_sort.features)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../datafiles.html" title="Sample data files"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">SpikeSort 0.13dev documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="extract-spike-sort-core-extract">
+<h1>Extract (<a class="reference internal" href="#module-spike_sort.core.extract" title="spike_sort.core.extract"><tt class="xref py py-mod docutils literal"><span class="pre">spike_sort.core.extract</span></tt></a>)<a class="headerlink" href="#extract-spike-sort-core-extract" title="Permalink to this headline">¶</a></h1>
+<p>This module is a collection of functions for pre-processing of raw
+recordings (filtering and upsampling), detecting spikes and extracting
+spikes based on detected spike times.</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.core.extract.align_spikes" title="spike_sort.core.extract.align_spikes"><tt class="xref py py-obj docutils literal"><span class="pre">align_spikes</span></tt></a>(spike_data,&nbsp;spt_dict,&nbsp;sp_win[,&nbsp;...])</td>
+<td>Aligns spike waves and returns corrected spike times</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#spike_sort.core.extract.detect_spikes" title="spike_sort.core.extract.detect_spikes"><tt class="xref py py-obj docutils literal"><span class="pre">detect_spikes</span></tt></a>(spike_data[,&nbsp;thresh,&nbsp;edge,&nbsp;...])</td>
+<td>Detects spikes in extracellular data using amplitude thresholding.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.core.extract.extract_spikes" title="spike_sort.core.extract.extract_spikes"><tt class="xref py py-obj docutils literal"><span class="pre">extract_spikes</span></tt></a>(spike_data,&nbsp;spt_dict,&nbsp;sp_win)</td>
+<td>Extract spikes from recording.</td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">filter_proxy</span></tt></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.core.extract.merge_spikes" title="spike_sort.core.extract.merge_spikes"><tt class="xref py py-obj docutils literal"><span class="pre">merge_spikes</span></tt></a>(spike_waves1,&nbsp;spike_waves2)</td>
+<td>Merges two sets of spike waves</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#spike_sort.core.extract.merge_spiketimes" title="spike_sort.core.extract.merge_spiketimes"><tt class="xref py py-obj docutils literal"><span class="pre">merge_spiketimes</span></tt></a>(spt1,&nbsp;spt2[,&nbsp;sort])</td>
+<td>Merges two sets of spike times</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.core.extract.remove_spikes" title="spike_sort.core.extract.remove_spikes"><tt class="xref py py-obj docutils literal"><span class="pre">remove_spikes</span></tt></a>(spt_dict,&nbsp;remove_dict,&nbsp;tolerance)</td>
+<td>Remove spikes with given spike times from the spike time</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#spike_sort.core.extract.resample_spikes" title="spike_sort.core.extract.resample_spikes"><tt class="xref py py-obj docutils literal"><span class="pre">resample_spikes</span></tt></a>(spikes_dict,&nbsp;FS_new)</td>
+<td>Upsample spike waveforms using spline interpolation</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#spike_sort.core.extract.split_cells" title="spike_sort.core.extract.split_cells"><tt class="xref py py-obj docutils literal"><span class="pre">split_cells</span></tt></a>(spikes,&nbsp;idx[,&nbsp;which])</td>
+<td>Return the spike features splitted into separate cells</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="module-spike_sort.core.extract">
+<span id="reference"></span><h2>Reference<a class="headerlink" href="#module-spike_sort.core.extract" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="spike_sort.core.extract.align_spikes">
+<tt class="descclassname">spike_sort.core.extract.</tt><tt class="descname">align_spikes</tt><big>(</big><em>spike_data</em>, <em>spt_dict</em>, <em>sp_win</em>, <em>type='max'</em>, <em>resample=1</em>, <em>contact=0</em>, <em>remove=True</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/extract.html#align_spikes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.extract.align_spikes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aligns spike waves and returns corrected spike times</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>spike_data</strong> : dict</p>
+<p><strong>spt_dict</strong> : dict</p>
+<p><strong>sp_win</strong> : list of int</p>
+<p><strong>type</strong> : {&#8216;max&#8217;, &#8216;min&#8217;}, optional</p>
+<p><strong>resample</strong> : int, optional</p>
+<p><strong>contact</strong> : int, optional</p>
+<p><strong>remove</strong> : bool, optiona</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first"><strong>ret_dict</strong> : dict</p>
+<blockquote class="last">
+<div><p>spike times of aligned spikes</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.extract.detect_spikes">
+<tt class="descclassname">spike_sort.core.extract.</tt><tt class="descname">detect_spikes</tt><big>(</big><em>spike_data</em>, <em>thresh='auto'</em>, <em>edge='rising'</em>, <em>contact=0</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/extract.html#detect_spikes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.extract.detect_spikes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Detects spikes in extracellular data using amplitude thresholding.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>spike_data</strong> : dict</p>
+<blockquote>
+<div><p>extracellular waveforms</p>
+</div></blockquote>
+<p><strong>thresh</strong> : float or &#8216;auto&#8217;</p>
+<blockquote>
+<div><p>threshold for detection. if thresh is &#8216;auto&#8217; it will be
+estimated from the data.</p>
+</div></blockquote>
+<p><strong>edge</strong> : {&#8216;rising&#8217;, &#8216;falling&#8217;}</p>
+<blockquote>
+<div><p>which edge to trigger on</p>
+</div></blockquote>
+<p><strong>contact</strong> : int, optional</p>
+<blockquote>
+<div><p>index of tetrode contact to use for detection, defaults to
+first contact</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first"><strong>spt_dict</strong> : dict</p>
+<blockquote class="last">
+<div><p>dictionary with &#8216;data&#8217; key which contains detected threshold
+crossing in miliseconds</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.extract.extract_spikes">
+<tt class="descclassname">spike_sort.core.extract.</tt><tt class="descname">extract_spikes</tt><big>(</big><em>spike_data</em>, <em>spt_dict</em>, <em>sp_win</em>, <em>resample=1</em>, <em>contacts='all'</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/extract.html#extract_spikes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.extract.extract_spikes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract spikes from recording.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>spike_data</strong> : dict</p>
+<blockquote>
+<div><p>extracellular data (see <em class="xref std std-ref">raw_recording</em>)</p>
+</div></blockquote>
+<p><strong>spt</strong> : dict</p>
+<blockquote>
+<div><p>spike times structure (see <a class="reference internal" href="../datastructures.html#spike-times"><em>Spike times</em></a>)</p>
+</div></blockquote>
+<p><strong>sp_win</strong> : list of int</p>
+<blockquote>
+<div><p>temporal extent of the wave shape</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first"><strong>wavedict</strong> : dict</p>
+<blockquote class="last">
+<div><p>spike waveforms structure (see <a class="reference internal" href="../datastructures.html#spike-wave"><em>Spike waveforms</em></a>)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.extract.filter_spt">
+<tt class="descclassname">spike_sort.core.extract.</tt><tt class="descname">filter_spt</tt><big>(</big><em>spike_data</em>, <em>spt_dict</em>, <em>sp_win</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/extract.html#filter_spt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.extract.filter_spt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.extract.merge_spikes">
+<tt class="descclassname">spike_sort.core.extract.</tt><tt class="descname">merge_spikes</tt><big>(</big><em>spike_waves1</em>, <em>spike_waves2</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/extract.html#merge_spikes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.extract.merge_spikes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merges two sets of spike waves</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>spike_waves1</strong> : dict</p>
+<p><strong>spike_waves2</strong> : dict</p>
+<blockquote>
+<div><p>spike wavefroms to merge; both spike wave sets must be defined
+within the same time window and with the same sampling
+frequency</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first"><strong>spike_waves</strong> : dict</p>
+<blockquote>
+<div><p>merged spike waveshapes</p>
+</div></blockquote>
+<p><strong>clust_idx</strong> : array</p>
+<blockquote class="last">
+<div><p>labels denoting to which set the given spike originally belonged to</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.extract.merge_spiketimes">
+<tt class="descclassname">spike_sort.core.extract.</tt><tt class="descname">merge_spiketimes</tt><big>(</big><em>spt1</em>, <em>spt2</em>, <em>sort=True</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/extract.html#merge_spiketimes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.extract.merge_spiketimes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merges two sets of spike times</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>spt1</strong> : dict</p>
+<p><strong>spt2</strong> : dict</p>
+<p><strong>sort</strong> : bool, optional</p>
+<blockquote>
+<div><p>False if you don&#8217;t want to be the spike times sorted.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first"><strong>spt</strong> : dict</p>
+<blockquote>
+<div><p>dictionary with merged spike time arrrays under data key</p>
+</div></blockquote>
+<p><strong>clust_idx</strong> : array</p>
+<blockquote class="last">
+<div><p>labels denoting to which set the given spike originally belonged
+to</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.extract.remove_doubles">
+<tt class="descclassname">spike_sort.core.extract.</tt><tt class="descname">remove_doubles</tt><big>(</big><em>spt_dict</em>, <em>tol</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/extract.html#remove_doubles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.extract.remove_doubles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.extract.remove_spikes">
+<tt class="descclassname">spike_sort.core.extract.</tt><tt class="descname">remove_spikes</tt><big>(</big><em>spt_dict</em>, <em>remove_dict</em>, <em>tolerance</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/extract.html#remove_spikes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.extract.remove_spikes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove spikes with given spike times from the spike time
+structure</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.extract.resample_spikes">
+<tt class="descclassname">spike_sort.core.extract.</tt><tt class="descname">resample_spikes</tt><big>(</big><em>spikes_dict</em>, <em>FS_new</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/extract.html#resample_spikes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.extract.resample_spikes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upsample spike waveforms using spline interpolation</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spike_sort.core.extract.split_cells">
+<tt class="descclassname">spike_sort.core.extract.</tt><tt class="descname">split_cells</tt><big>(</big><em>spikes</em>, <em>idx</em>, <em>which='all'</em><big>)</big><a class="reference internal" href="../_modules/spike_sort/core/extract.html#split_cells"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike_sort.core.extract.split_cells" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the spike features splitted into separate cells</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"> <img src="../_static/logo.png"
+type="image/png" /> </img> 
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Extract (<tt class="docutils literal"><span class="pre">spike_sort.core.extract</span></tt>)</a><ul>
+<li><a class="reference internal" href="#module-spike_sort.core.extract">Reference</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../datafiles.html" title="previous chapter">Sample data files</a></li>
+      <li>Next: <a href="features.html" title="next chapter">Calculate features (<tt class="docutils literal docutils literal"><span class="pre">spike_sort.features</span></tt>)</a></li>
+  </ul></li>
+</ul>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/modules/extract.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div> 
+  <div class="footer">
+    &copy; Copyright 2011, Bartosz Telenczuk, Dmytro Bielievstsov.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

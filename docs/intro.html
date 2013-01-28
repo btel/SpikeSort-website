@@ -1,0 +1,355 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Introduction &mdash; SpikeSort 0.13dev documentation</title>
+    
+    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.13dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="SpikeSort 0.13dev documentation" href="index.html" />
+    <link rel="next" title="Tutorials" href="tutorials/index.html" />
+    <link rel="prev" title="Welcome to SpikesSort’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+  
+  
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="np-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorials/index.html" title="Tutorials"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to SpikesSort’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">SpikeSort 0.13dev documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="what-is-spike-sorting">
+<h2>What is spike sorting?<a class="headerlink" href="#what-is-spike-sorting" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p><em>Spike sorting is a class of techniques used in the analysis of
+electrophysiological data. Spike sorting algorithms use the
+shape(s) of waveforms collected with one or more electrodes in the
+brain to distinguish the activity of one or more neurons from
+background electrical noise.</em></p>
+<blockquote>
+<div>Source: Spike sorting, <a class="reference external" href="http://en.wikipedia.org/wiki/Spike_sorting">Wikipedia</a></div></blockquote>
+</div></blockquote>
+<p>Spike sorting usually consists of the following steps <a class="reference internal" href="#quiroga2004">[Quiroga2004]</a>:</p>
+<ol class="arabic">
+<li><p class="first">Spike detection (<em>detect</em>)</p>
+<p>Spikes are very rapid and often sparse events, so that they appear
+only a tiny fraction of the recordings. To achieve a sort of
+compression and easy the subsequent analysis, the times of
+occurrence of putative spikes are first identified in the continuous
+by means of thresholding. This method return only events that cross
+a specified threshold (selected based on some data statistics, such
+as standard deviation, or visually).</p>
+</li>
+<li><p class="first">Spike waveform extraction (<em>extract</em>)</p>
+<p>Based on the series of spike times identified in the previous step,
+we now may proceed to extract the spike waveforms by taking a small
+segment of the signal around each spike time. Such segments are
+usually automatically aligned to a specific feature of the
+waveform, for example maximum or minimum.</p>
+</li>
+<li><p class="first">Feature extraction (<em>feature</em>)</p>
+<p>This is one of the most important steps in which the silent
+features of the spikes such as peak-to-peak amplitude or spike
+width are calculated based on spike waveshapes. The features should
+be preferably low-dimensional and should well differentiate spikes
+of different cells and noise.</p>
+</li>
+<li><p class="first">Clustering (<em>cluster</em>)</p>
+<p>At the heart of spike sorting is the clustering that uses
+automatic, semi-automatic or manual methods to identify groups of
+spikes belonging to the same cell (often called unit). The
+procedure is usually applied in n-dimensional space of spike
+features, where each feature is a single dimension. Since it is
+very difficult to do that visually for more than 2 features (on a
+plane), one usually resorts to different clustring algorithms, such
+as K-means or Gaussian Mixture Models that can handle large number
+of dimension.</p>
+</li>
+<li><p class="first">Sorting evaluation (<em>evaluate</em>)</p>
+<p>After sorting is done and we have determined spike times of
+different units, we have to make sure that the quality of sorting
+is sufficient for further analysis. There are multiple visual and
+statistical methods that help in this evaluations, such as
+inter-spike intervals histograms, waveforms overlays,
+cross-corellograms etc. <a class="reference internal" href="#hill2011">[Hill2011]</a>.</p>
+</li>
+</ol>
+<p>SpikeSort is a comprehensive library whose goal is to accompany you trough
+the entire process of spike sorting - from detection to evaluation.
+It is not fully automatic or on-line sorting program. Although we
+include lots of functions, that help to automatize some of the
+repetitive task, good sorting will always require human supervision.</p>
+</div>
+<div class="section" id="design-goals">
+<h2>Design goals<a class="headerlink" href="#design-goals" title="Permalink to this headline">¶</a></h2>
+<p>There are several of spike sorting programs on the market both commercial and free
+and open source. We started this projects to offer an alternative that
+would be free, scriptable and preferably in our favourite language:
+Python. However, we did not try to re-invent the
+wheel and whenever we could we leveraged the established libraries.</p>
+<p>We had a few design goals when we worked on SpikeSort;</p>
+<ul>
+<li><p class="first">modular</p>
+<p>Spike sorting is modular - there are several steps and different
+techniques that can and
+should be mixed-and-matched to adjust the process to the data we
+try to analyze. Spike sorting library should be modular as well to allow for
+much flexibility. This is achieved by composing the library of
+independent components that can be easily inserted into or deleted
+from the spike sorting workflow.</p>
+</li>
+<li><p class="first">customizable</p>
+<p>No two data sets are the same. Different experimental protocols,
+different acquisition systems, different neural systems result in
+different properties of the data and thus require different methods.
+Therefore, a good spike sorting library should allow for easy and
+flexible customizations of the algorithms used at each stage of spike
+sorting and their parameters.</p>
+</li>
+<li><p class="first">easy-to-use</p>
+<p>Flexibility usually comes at price: the usability. Nevertheless, a
+transparent design can allow complex systems to be user-friendly.
+The interface should allow to focus on the data and not on the
+peculiarities of specific software solutions.</p>
+</li>
+<li><p class="first">fast</p>
+<p>In practice, one will try to discriminate thousands of spikes of
+tens of different neurons. Any performance optimizations will save
+you precious minutes (hours or even days) for the task you are most
+interested in: decoding what the cells actually do.</p>
+</li>
+<li><p class="first">compatible with standard libraries (NumPy, SciPy, matplotlib)</p>
+<p>There is no need to reinvent the wheel. Python developers provide
+hundreds of optimized, well-tested and widely-used libraries with
+great community support. Why not use them? Moreover, any data coming
+from the spike sorting libraries should be easily pluggable into
+third-party analysis routines and databases.</p>
+</li>
+</ul>
+<p>Although still much work is required to meet all the goals, we kept
+them all in mind while designing the SpikeSort. As a result, SpikeSort
+is already  an usable and powerful framework that will help you to
+get most of your data.</p>
+</div>
+<div class="section" id="why-python">
+<h2>Why Python?<a class="headerlink" href="#why-python" title="Permalink to this headline">¶</a></h2>
+<p>Python is a interpreted and very dynamic language with huge very
+enthusiastic community. It grew to be the de-facto standard in
+computational science <a class="reference internal" href="#langtangen2009">[Langtangen2009]</a> and it rapidly gains momentum in
+experimental disciplines <a class="reference internal" href="#hanke2009">[Hanke2009]</a>. Python is also completely free and available
+for multiple platforms - it means that you can run it at home, at work
+or give it to your students with no additional costs. Last but not
+least Python can be easily interfaced with other languages making it a
+&#8216;&#8217;glueing&#8217;&#8217; language that can make two independent libraries to
+communicate.</p>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>You can download the most recent release of SpikeSort from github:</p>
+<div class="highlight-python"><pre>git clone git://github.com/btel/SpikeSort.git</pre>
+</div>
+<p>In order to install SortSpike you need following libraries:</p>
+<ul class="simple">
+<li>python 2.6 or 2.7</li>
+<li>setuptools</li>
+<li>scipy</li>
+<li>numpy</li>
+<li>pytables</li>
+<li>matplotlib (only for plotting)</li>
+</ul>
+<p>Optional dependencies are:</p>
+<ul class="simple">
+<li>scikits.learn - clustering algorithms</li>
+<li>neurotools - spike train analysis</li>
+<li>ipython - enhanced python shell</li>
+</ul>
+<p>If some of the python packages are not available on your system you
+can install them with easy-install:</p>
+<div class="highlight-python"><pre>easy_install numpy scipy pytables matplotlib</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you are not familiar with Python packaging system we recommend
+you installing a complete Python distribution from a company called
+Enthought: <a class="reference external" href="http://www.enthought.com/products/epd.php">EPD</a>
+(there are free academic licenses). Installers for Windows, MacOSX
+and Linux are available.</p>
+</div>
+<p>If you have the above libraries you can install SpikeSort simply
+issuing the command:</p>
+<div class="highlight-python"><pre>python setup.py install</pre>
+</div>
+<p>If you prefer to install it in your home directory you may try:</p>
+<div class="highlight-python"><pre>python setup.py install --user</pre>
+</div>
+<p>but remember to add <tt class="file docutils literal"><span class="pre">$HOME/.local/lib/python2.6/site-packages</span></tt> to your python
+path.</p>
+<p>After a successful installation you can run the supplied tests:</p>
+<div class="highlight-python"><pre>python setup.py nosetests</pre>
+</div>
+<p>If you don&#8217;t have all the optional dependencies, be prepared for some
+tests errors.</p>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>In <tt class="file docutils literal"><span class="pre">examples/sorting</span></tt> subdirectory you will find some sample scripts,
+which use SpikeSort for spike sorting</p>
+<ul class="simple">
+<li><tt class="file docutils literal"><span class="pre">cluster_manual.py</span></tt> - sort spikes by manual cluster cutting</li>
+<li><tt class="file docutils literal"><span class="pre">cluster_auto.py</span></tt> - automatically cluster with GMM (Gaussian
+Mixture Models) algorithm (see our tutorial
+<a class="reference internal" href="tutorials/tutorial_manual.html#lowlevel-tutorial"><em>Using low-level interface</em></a>)</li>
+<li><tt class="file docutils literal"><span class="pre">cluster_beans.py</span></tt> - run full stack spike-sorting evnvironment
+and show spikes in a spike browser (see our tutorial <a class="reference internal" href="tutorials/tutorial_beans.html#beans-tutorial"><em>Interactive spike sorting</em></a>)</li>
+</ul>
+<p>In order to run these examples, you need to download <a class="reference internal" href="datafiles.html#tutorial-data"><em>Tutorial data</em></a> and define an environment variable <tt class="docutils literal"><span class="pre">DATAPATH</span></tt>:</p>
+<div class="highlight-python"><pre>export DATAPATH=/path/to/data/directory</pre>
+</div>
+<p>where <tt class="docutils literal"><span class="pre">/path/to/data/directory</span></tt> points to the directory where you
+downloaded the data file.</p>
+<p>Once you have the tutorial data, you may run above script, for example:</p>
+<div class="highlight-python"><pre>python -i cluster_auto.py</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The <tt class="docutils literal"><span class="pre">-i</span></tt> in python command will leave a Python interpreter open
+for interactive exploration - read more  in our tutorials.</p>
+</div>
+</div>
+<div class="section" id="similar-software">
+<h2>Similar software<a class="headerlink" href="#similar-software" title="Permalink to this headline">¶</a></h2>
+<p>There are a few open source packages for spike sorting that have
+different design and use case:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://www.frontiersin.org/Neuroinformatics/10.3389/neuro.11.009.2008/pdf/abstract">spyke</a></li>
+<li><a class="reference external" href="http://packages.python.org/OpenElectrophy/">OpenElectrophy</a></li>
+<li><a class="reference external" href="http://code.google.com/p/spikepy/">spikepy</a></li>
+<li><a class="reference external" href="http://klusters.sourceforge.net/">Klusters</a></li>
+</ul>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<table class="docutils citation" frame="void" id="quiroga2004" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[Quiroga2004]</a></td><td>Quiroga, RQ, Z. Nadasdy, Y. Ben-Shaul, and others. <em>“Unsupervised Spike Detection and Sorting with Wavelets and Superparamagnetic Clustering.”</em> Neural Computation <strong>16</strong>, no. 8 (2004):1661. <a class="reference external" href="http://www.vis.caltech.edu/~rodri/papers/Spike_sorting.pdf">http://www.vis.caltech.edu/~rodri/papers/Spike_sorting.pdf</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="hill2011" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[Hill2011]</a></td><td>Hill, Daniel N, Samar B Mehta, and David Kleinfeld. <em>“Quality Metrics to Accompany Spike Sorting of Extracellular Signals.”</em> The Journal of Neuroscience <strong>31</strong>, no. 24 (2011): 8699-8705. <a class="reference external" href="http://neuro.cjb.net/content/31/24/8699.full">http://neuro.cjb.net/content/31/24/8699.full</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="hanke2009" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[Hanke2009]</a></td><td>Hanke, Michael, Yaroslav O. Halchenko, Per B. Sederberg, Emanuele Olivetti, Ingo Fründ, Jochem W. Rieger, Christoph S. Herrmann, James V. Haxby, Stephen José Hanson, and Stefan Pollmann. <em>“PyMVPA: a Unifying Approach to the Analysis of&nbsp; Neuroscientific Data.”</em> Frontiers in Neuroinformatics <strong>3</strong> (2009): 3.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="langtangen2009" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[Langtangen2009]</a></td><td>Langtangen, Hans Petter. <em>Python Scripting for Computational Science</em>. 3rd ed. Springer, 2009.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"> <img src="_static/logo.png"
+type="image/png" /> </img> 
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Introduction</a><ul>
+<li><a class="reference internal" href="#what-is-spike-sorting">What is spike sorting?</a></li>
+<li><a class="reference internal" href="#design-goals">Design goals</a></li>
+<li><a class="reference internal" href="#why-python">Why Python?</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#similar-software">Similar software</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to SpikesSort&#8217;s documentation!</a></li>
+      <li>Next: <a href="tutorials/index.html" title="next chapter">Tutorials</a></li>
+  </ul></li>
+</ul>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/intro.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div> 
+  <div class="footer">
+    &copy; Copyright 2011, Bartosz Telenczuk, Dmytro Bielievstsov.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>
